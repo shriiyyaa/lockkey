@@ -18,8 +18,8 @@ router.post(
   '/signup',
   [
     body('name', 'Name is required').not().isEmpty().trim(),
-    body('email', 'Please include a valid email').isEmail().normalizeEmail(),
-    body('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+    body('email', 'Please include a valid email').trim().isEmail().normalizeEmail(),
+    body('password', 'Password must be at least 6 characters').trim().isLength({ min: 6 }),
   ],
   async (req, res) => {
     // Validate inputs
@@ -75,8 +75,8 @@ router.post(
 router.post(
   '/login',
   [
-    body('email', 'Please include a valid email').isEmail().normalizeEmail(),
-    body('password', 'Password is required').exists(),
+    body('email', 'Please include a valid email').trim().isEmail().normalizeEmail(),
+    body('password', 'Password is required').trim().exists(),
   ],
   async (req, res) => {
     const errors = validationResult(req);

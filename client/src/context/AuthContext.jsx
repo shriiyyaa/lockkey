@@ -31,7 +31,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    const res = await api.post('/auth/login', { email: cleanEmail, password: cleanPassword });
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
     setUser(res.data.user);
@@ -39,7 +41,10 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (name, email, password) => {
-    const res = await api.post('/auth/signup', { name, email, password });
+    const cleanName = name.trim();
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    const res = await api.post('/auth/signup', { name: cleanName, email: cleanEmail, password: cleanPassword });
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
     setUser(res.data.user);
