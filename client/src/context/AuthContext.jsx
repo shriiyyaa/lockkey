@@ -12,19 +12,27 @@ export function AuthProvider({ children }) {
     const savedUser = localStorage.getItem('lockkey_user');
 
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      // Verify token is still valid
-      api.get('/auth/me')
-        .then(res => {
-          setUser(res.data);
-          localStorage.setItem('lockkey_user', JSON.stringify(res.data));
-        })
-        .catch(() => {
-          localStorage.removeItem('lockkey_token');
-          localStorage.removeItem('lockkey_user');
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
+      try {
+        setUser(JSON.parse(savedUser));
+        // Verify token is still valid
+        api.get('/auth/me')
+          .then(res => {
+            setUser(res.data);
+            localStorage.setItem('lockkey_user', JSON.stringify(res.data));
+          })
+          .catch(() => {
+            localStorage.removeItem('lockkey_token');
+            localStorage.removeItem('lockkey_user');
+            setUser(null);
+          })
+          .finally(() => setLoading(false));
+      } catch (e) {
+        // If JSON.parse fails, clear corrupted config
+        localStorage.removeItem('lockkey_token');
+        localStorage.removeItem('lockkey_user');
+        setUser(null);
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
