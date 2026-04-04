@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
-const WORDS = ['FOCUS', 'VAULT', 'AWAKE', 'BLOCK', 'CLEAR', 'SMART', 'PULSE', 'TRACK', 'GRIND', 'BUILD'];
+const WORDS = ['APPLE', 'LEMON', 'MANGO', 'MELON', 'PEACH', 'BERRY', 'GRAPE', 'PLUMS', 'GUAVA'];
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 
