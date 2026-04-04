@@ -88,6 +88,18 @@ export default function UnlockFlow() {
     }
   };
 
+  const isCompleted = lock?.status === 'completed';
+  const isUnlocking = lock?.status === 'unlocking';
+  const unlockAvailableAt = lock?.earlyUnlockRequestedAt 
+    ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
+    : null;
+    
+  useEffect(() => {
+    if (isUnlocking && unlockAvailableAt && new Date() >= unlockAvailableAt && !lock?.challengeCompleted && !showChallenge) {
+      setShowChallenge(true);
+    }
+  }, [isUnlocking, unlockAvailableAt, lock?.challengeCompleted, showChallenge]);
+
   if (loading && !lock) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -109,18 +121,6 @@ export default function UnlockFlow() {
       </div>
     );
   }
-
-  const isCompleted = lock.status === 'completed';
-  const isUnlocking = lock.status === 'unlocking';
-  const unlockAvailableAt = lock.earlyUnlockRequestedAt 
-    ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
-    : null;
-    
-  useEffect(() => {
-    if (isUnlocking && unlockAvailableAt && new Date() >= unlockAvailableAt && !lock.challengeCompleted && !showChallenge) {
-      setShowChallenge(true);
-    }
-  }, [isUnlocking, unlockAvailableAt, lock?.challengeCompleted, showChallenge]);
 
   return (
     <div className="max-w-3xl mx-auto pb-12">
