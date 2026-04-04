@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mono-50: #fafafa;
+  --color-mono-100: #f4f4f5;
+  --color-mono-200: #e4e4e7;
+  --color-mono-300: #d4d4d8;
+  --color-mono-400: #a1a1aa;
+  --color-mono-500: #71717a;
+  --color-mono-600: #52525b;
+  --color-mono-700: #3f3f46;
+  --color-mono-800: #27272a;
+  --color-mono-900: #18181b;
+  --color-mono-950: #0a0a0a;
+  --color-ivory: #faf9f6;
+}
+
+@layer base {
+  body {
+    @apply bg-mono-950 text-ivory tracking-normal leading-normal antialiased;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+  }
+}
+
+@layer components {
+  /* Sharp Retro Ivory Cards */
+  .geometric-card {
+    @apply bg-ivory text-mono-950 rounded-none border-2 border-mono-950 shadow-[4px_4px_0_0_#3f3f46] transition-all duration-200;
+  }
+  
+  .geometric-card:hover {
+    @apply shadow-[6px_6px_0_0_#3f3f46] -translate-x-[1px] -translate-y-[1px];
+  }
+
+  /* Retro Input Style */
+  .input-field {
+    @apply w-full bg-ivory border-2 border-mono-950 text-mono-950 rounded-none px-4 py-2 placeholder:text-mono-400 focus:outline-none transition-all duration-200;
+    font-size: 12px;
+  }
+  
+  .input-field-error {
+    @apply border-red-600 focus:shadow-[4px_4px_0_0_#ef4444];
+  }
+
+  /* Retro Ivory Buttons */
+  .btn-primary {
+    @apply relative bg-ivory text-mono-950 font-black uppercase tracking-widest px-6 py-3 rounded-none border-2 border-mono-950 transition-all duration-200 shadow-[4px_4px_0_0_#3f3f46] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0_0_#3f3f46] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+    font-size: 14px;
+  }
+
+  .btn-secondary {
+    @apply bg-mono-800 text-ivory font-black uppercase tracking-widest px-6 py-3 rounded-none border-2 border-mono-950 transition-all duration-200 shadow-[4px_4px_0_0_#000] hover:bg-mono-700 hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+    font-size: 14px;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-ivory font-black uppercase tracking-widest px-5 py-2.5 rounded-none border-2 border-mono-950 transition-all duration-200 shadow-[4px_4px_0_0_#000] hover:bg-red-500 hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+    font-size: 14px;
+  }
+
+  /* Specific Retro Font Sizes */
+  .heading-primary {
+    @apply font-black tracking-normal uppercase text-ivory;
+    font-size: 16px;
+  }
+
+  .sub-heading {
+    @apply font-black tracking-normal uppercase;
+    font-size: 14px;
+  }
+  
+  .text-subtle {
+    @apply text-mono-400 font-bold;
+    font-size: 12px;
+  }
+}
