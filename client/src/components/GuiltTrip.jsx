@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import WordleGame from './WordleGame';
 
 export default function GuiltTrip({ onComplete, onCancel }) {
-  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Rationalize
+  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Rationalize
+  
+  // TicTacToe State
   const [ticTacToeState, setTicTacToeState] = useState(Array(9).fill(null));
+  const [currentPlayer, setCurrentPlayer] = useState('X');
   const [gameMessage, setGameMessage] = useState("YOU CANNOT WIN.");
+  
+  // Rationale State
   const [rationalMessage, setRationalMessage] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -55,47 +61,60 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     }
   };
 
-  const computerMove = () => {
-    let bestScore = -Infinity;
-    let move = -1;
-    for (let i = 0; i < 9; i++) {
-      if (ticTacToeState[i] === null) {
-        let board = [...ticTacToeState];
-        board[i] = 'O';
-        let score = minimax(board, 0, false);
-        board[i] = null;
-        if (score > bestScore) {
-          bestScore = score;
-          move = i;
+  useEffect(() => {
+    if (step !== 2) return;
+    
+    const winner = checkWinner(ticTacToeState);
+    if (winner === 'O') {
+      setGameMessage("I TOLD YOU. SURRENDER.");
+      return;
+    } else if (winner === 'draw') {
+        // Automatically progress after drawing. Unbeatable AI means Draw is a success.
+        setGameMessage("STALEMATE DETECTED. PROCEEDING TO VERBAL PROTOCOL...");
+        const timer = setTimeout(() => setStep(3), 2000);
+        return () => clearTimeout(timer);
+    }
+
+    if (currentPlayer === 'O') {
+      // AI's turn! Wait slightly for fairness UX
+      const timer = setTimeout(() => {
+        let bestScore = -Infinity;
+        let move = -1;
+        for (let i = 0; i < 9; i++) {
+          if (ticTacToeState[i] === null) {
+            let board = [...ticTacToeState];
+            board[i] = 'O';
+            let score = minimax(board, 0, false);
+            board[i] = null;
+            if (score > bestScore) {
+              bestScore = score;
+              move = i;
+            }
+          }
         }
-      }
-    }
-    if (move !== -1) {
-      const newState = [...ticTacToeState];
-      newState[move] = 'O';
-      setTicTacToeState(newState);
+        if (move !== -1) {
+          const newState = [...ticTacToeState];
+          newState[move] = 'O';
+          setTicTacToeState(newState);
+          setCurrentPlayer('X');
+        }
+      }, 600); // 600ms AI thought process
       
-      const winner = checkWinner(newState);
-      if (winner === 'O') setGameMessage("I TOLD YOU. SURRENDER.");
-      else if (winner === 'draw') setGameMessage("A DRAW IS FAILURE. RETRY.");
+      return () => clearTimeout(timer);
     }
-  };
+  }, [ticTacToeState, currentPlayer, step]);
 
   const handleUserMove = (index) => {
-    if (ticTacToeState[index] || checkWinner(ticTacToeState)) return;
+    if (currentPlayer !== 'X' || ticTacToeState[index] || checkWinner(ticTacToeState)) return;
     const newState = [...ticTacToeState];
     newState[index] = 'X';
     setTicTacToeState(newState);
-    
-    if (!checkWinner(newState)) {
-      setTimeout(computerMove, 500);
-    } else if (checkWinner(newState) === 'draw') {
-      setGameMessage("STALEMATE. YOU ARE WASTING TIME.");
-    }
+    setCurrentPlayer('O');
   };
 
-  const resetGame = () => {
+  const resetTicTacToe = () => {
     setTicTacToeState(Array(9).fill(null));
+    setCurrentPlayer('X');
     setGameMessage("YOU CANNOT WIN.");
   };
 
@@ -146,29 +165,29 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">SYSTEM_STRUGGLE</h2>
-              <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">BEAT THE SYSTEM TO PROCEED.</p>
+              <h2 className="sub-heading text-mono-950 mb-2">SYSTEM_STRUGGLE (1/3)</h2>
+              <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">FORCE A STALEMATE TO PROCEED.</p>
               
               <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto mb-6">
                 {ticTacToeState.map((cell, i) => (
                   <button
                     key={i}
                     onClick={() => handleUserMove(i)}
-                    className="h-16 border-2 border-mono-950 flex items-center justify-center text-2xl font-black transition-colors bg-mono-50 hover:bg-mono-100"
+                    disabled={currentPlayer !== 'X' || cell !== null || checkWinner(ticTacToeState) !== null}
+                    className="h-16 border-2 border-mono-950 flex items-center justify-center text-2xl font-black transition-colors bg-mono-50 hover:bg-mono-100 disabled:opacity-80 disabled:cursor-not-allowed"
                   >
                     {cell}
                   </button>
                 ))}
               </div>
               
-              <p className="text-[10px] font-black text-red-600 mb-6 uppercase tracking-widest">{gameMessage}</p>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-6 ${
+                checkWinner(ticTacToeState) === 'draw' ? 'text-green-600 animate-pulse' : 'text-red-600'
+              }`}>{gameMessage}</p>
               
               <div className="flex gap-4">
-                <button onClick={resetGame} className="btn-secondary flex-1 py-2 text-[10px]">
-                  RETRY_STRUGGLE
-                </button>
-                <button onClick={() => setStep(3)} className="btn-primary flex-1 py-2 text-[10px]">
-                  GIVE_UP_&_RATIONALIZE
+                <button onClick={resetTicTacToe} className="btn-secondary flex-1 py-2 text-[10px]">
+                  RESTART ALGORITHM
                 </button>
               </div>
             </motion.div>
@@ -182,7 +201,29 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK</h2>
+              <h2 className="sub-heading text-mono-950 mb-2">VERBAL PROTOCOL (2/3)</h2>
+              <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">DECIPHER THE MASTER WORD TO CONTINUE.</p>
+              
+              <WordleGame 
+                onWin={() => setStep(4)} 
+                onLose={() => {
+                  // Re-start from Wordle if they fail, or punt them to step 1!
+                  setStep(1); 
+                  resetTicTacToe();
+                }} 
+              />
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div 
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="text-center"
+            >
+              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK (3/3)</h2>
               <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">EXPLAIN THE RATIONALE FOR THIS FAILURE.</p>
               
               <textarea
