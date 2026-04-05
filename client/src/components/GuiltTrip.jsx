@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WordleGame from './WordleGame';
+import ZenHold from './ZenHold';
+import StroopTest from './StroopTest';
 
 export default function GuiltTrip({ onComplete, onCancel }) {
-  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Rationalize
+  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: ZenHold, 5: Stroop, 6: Rationalize
   
   // TicTacToe State
   const [ticTacToeState, setTicTacToeState] = useState(Array(9).fill(null));
@@ -184,7 +186,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">SYSTEM_STRUGGLE (1/3)</h2>
+              <h2 className="sub-heading text-mono-950 mb-2">SYSTEM_STRUGGLE (1/5)</h2>
               <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">DEFEAT THE SYSTEM TO PROCEED.</p>
               
               <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto mb-6">
@@ -220,7 +222,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">VERBAL PROTOCOL (2/3)</h2>
+              <h2 className="sub-heading text-mono-950 mb-2">VERBAL PROTOCOL (2/5)</h2>
               <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">DECIPHER THE MASTER WORD TO CONTINUE.</p>
               
               <WordleGame 
@@ -240,7 +242,33 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK (3/3)</h2>
+              <h2 className="sub-heading text-mono-950 mb-2">CALMNESS_TEST (3/5)</h2>
+              <ZenHold onComplete={() => setStep(5)} />
+            </motion.div>
+          )}
+
+          {step === 5 && (
+            <motion.div 
+              key="step5"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="text-center"
+            >
+              <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (4/5)</h2>
+              <StroopTest onComplete={() => setStep(6)} />
+            </motion.div>
+          )}
+
+          {step === 6 && (
+            <motion.div 
+              key="step6"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="text-center"
+            >
+              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK (5/5)</h2>
               <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">EXPLAIN THE RATIONALE FOR THIS FAILURE.</p>
               
               <textarea
