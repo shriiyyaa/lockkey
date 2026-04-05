@@ -107,6 +107,9 @@ export default function Signup() {
                 03. ACCESS_KEY
               </label>
               <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`input-field pr-10 ${error.toLowerCase().includes('password') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
