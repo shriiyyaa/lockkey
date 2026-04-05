@@ -145,7 +145,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     setIsAnalyzing(true);
     setTimeout(() => {
       onComplete();
-    }, 15000); // 15 second mandatory "reflection" wait
+    }, 3000); // 3 second mandatory "reflection" wait
   };
 
   const validateRationale = (text) => {
@@ -308,7 +308,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
                       className="h-full bg-red-600"
                       initial={{ width: 0 }}
                       animate={{ width: "100%" }}
-                      transition={{ duration: 15, ease: "linear" }}
+                      transition={{ duration: 3, ease: "linear" }}
                     />
                   </div>
                   <p className="text-[8px] text-mono-400 mt-4 text-center uppercase tracking-widest">DO NOT CLOSE. REFLECT ON YOUR FAILURE.</p>
