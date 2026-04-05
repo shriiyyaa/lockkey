@@ -141,9 +141,9 @@ export default function UnlockFlow() {
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="geometric-card p-10 text-center"
+            className="geometric-card p-6 sm:p-10 text-center"
           >
-            <h2 className="sub-heading text-mono-950 mb-1">
+            <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-1">
               DECRYPTION SUCCESSFUL
             </h2>
             <p className="text-[10px] font-black text-mono-400 mb-8 uppercase tracking-widest">
@@ -172,9 +172,9 @@ export default function UnlockFlow() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="geometric-card p-10 text-center"
+            className="geometric-card p-6 sm:p-10 text-center"
           >
-            <h2 className="sub-heading text-mono-950 mb-1">
+            <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-1">
               PROTOCOL EXPIRED
             </h2>
             <p className="text-[10px] font-bold text-mono-400 mb-8 uppercase tracking-widest">
@@ -225,9 +225,9 @@ export default function UnlockFlow() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="geometric-card p-10 text-center"
+            className="geometric-card p-6 sm:p-10 text-center"
           >
-            <h2 className="sub-heading text-mono-950 mb-6">
+            <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-6 uppercase">
               FORCE UNLOCK SEQUENCE
             </h2>
             
@@ -269,9 +269,9 @@ export default function UnlockFlow() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="geometric-card p-10 text-center"
+            className="geometric-card p-6 sm:p-10 text-center"
           >
-            <h2 className="sub-heading text-mono-950 mb-6">
+            <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-6 uppercase">
               SYSTEM ENCRYPTION: ACTIVE
             </h2>
 
