@@ -14,9 +14,12 @@ export function AuthProvider({ children }) {
     // RECOVERY MODE: If we have a token, we can ALWAYS try to fetch the user profile
     // even if the cached 'lockkey_user' is missing or corrupted.
     if (token) {
+      let isCached = false;
       if (savedUser) {
         try {
           setUser(JSON.parse(savedUser));
+          setLoading(false); // OPTIMISTIC LOADING: Show the app instantly!
+          isCached = true;
         } catch (e) {
           console.error("AuthContext: Cached user corrupted, fetching fresh...");
         }
@@ -31,7 +34,9 @@ export function AuthProvider({ children }) {
           console.error("AuthContext: Session verification failed:", err.message);
           logout(); // Clear invalid token
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (!isCached) setLoading(false);
+        });
     } else {
       setLoading(false);
     }
