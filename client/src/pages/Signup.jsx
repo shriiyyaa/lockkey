@@ -64,11 +64,11 @@ export default function Signup() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
               <motion.div 
-                initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}
-                className="bg-red-100 border-2 border-red-600 text-red-600 text-[10px] font-black px-4 py-2 rounded-none shadow-[3px_3px_0_0_#991b1b] uppercase tracking-widest" 
+                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                className="bg-red-50 border-2 border-red-500 text-red-600 text-[10px] font-black px-4 py-3 rounded-none shadow-[4px_4px_0_0_#ef4444] tracking-[0.1em] text-center" 
                 id="error-message"
               >
-                [!] REG_ERROR: {error.toUpperCase()}
+                {error}
               </motion.div>
             )}
 
@@ -81,7 +81,7 @@ export default function Signup() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="input-field"
+                className={`input-field ${error.toLowerCase().includes('name') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
                 placeholder="John Doe"
                 id="input-signup-name"
               />
@@ -96,7 +96,7 @@ export default function Signup() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
+                className={`input-field ${error.toLowerCase().includes('email') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
                 placeholder="you@example.com"
                 id="input-signup-email"
               />
@@ -107,12 +107,9 @@ export default function Signup() {
                 03. ACCESS_KEY
               </label>
               <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-10"
+                  className={`input-field pr-10 ${error.toLowerCase().includes('password') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
                   placeholder="Min 6 characters"
                   minLength={6}
                   id="input-signup-password"

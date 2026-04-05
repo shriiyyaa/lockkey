@@ -63,11 +63,11 @@ export default function Login() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <motion.div 
-                initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}
-                className="bg-red-100 border-2 border-red-600 text-red-600 text-[10px] font-black px-4 py-2 rounded-none shadow-[3px_3px_0_0_#991b1b] uppercase tracking-widest" 
+                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                className="bg-red-50 border-2 border-red-500 text-red-600 text-[10px] font-black px-4 py-3 rounded-none shadow-[4px_4px_0_0_#ef4444] tracking-[0.1em] text-center" 
                 id="error-message"
               >
-                [!] AUTH_ERROR: {error.toUpperCase()}
+                {error}
               </motion.div>
             )}
 
@@ -80,7 +80,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
+                className={`input-field ${error.toLowerCase().includes('email') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
                 placeholder="you@example.com"
                 id="input-login-email"
               />
@@ -96,7 +96,7 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field"
+                  className={`input-field ${error.toLowerCase().includes('password') ? 'border-red-500 bg-red-50 shadow-[2px_2px_0_0_#ef4444]' : ''}`}
                   placeholder="••••••••"
                   id="input-login-password"
                 />
