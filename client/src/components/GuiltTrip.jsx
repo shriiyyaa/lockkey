@@ -68,27 +68,44 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     if (winner === 'O') {
       setGameMessage("I TOLD YOU. SURRENDER.");
       return;
-    } else if (winner === 'draw') {
-        // Automatically progress after drawing. Unbeatable AI means Draw is a success.
-        setGameMessage("STALEMATE DETECTED. PROCEEDING TO VERBAL PROTOCOL...");
+    } else if (winner === 'X') {
+        setGameMessage("SYSTEM DEFEATED. PROCEEDING TO VERBAL PROTOCOL...");
         const timer = setTimeout(() => setStep(3), 2000);
         return () => clearTimeout(timer);
+    } else if (winner === 'draw') {
+        setGameMessage("STALEMATE DETECTED. YOU MUST *DEFEAT* ME. RETRY.");
+        return;
     }
 
     if (currentPlayer === 'O') {
       // AI's turn! Wait slightly for fairness UX
       const timer = setTimeout(() => {
-        let bestScore = -Infinity;
         let move = -1;
-        for (let i = 0; i < 9; i++) {
-          if (ticTacToeState[i] === null) {
-            let board = [...ticTacToeState];
-            board[i] = 'O';
-            let score = minimax(board, 0, false);
-            board[i] = null;
-            if (score > bestScore) {
-              bestScore = score;
-              move = i;
+        
+        // 35% chance to make a random sub-optimal move to give user a chance
+        if (Math.random() < 0.35) {
+          const emptyIndices = [];
+          for (let i = 0; i < 9; i++) {
+            if (ticTacToeState[i] === null) emptyIndices.push(i);
+          }
+          if (emptyIndices.length > 0) {
+            move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+          }
+        }
+
+        // Otherwise use perfect Minimax
+        if (move === -1) {
+          let bestScore = -Infinity;
+          for (let i = 0; i < 9; i++) {
+            if (ticTacToeState[i] === null) {
+              let board = [...ticTacToeState];
+              board[i] = 'O';
+              let score = minimax(board, 0, false);
+              board[i] = null;
+              if (score > bestScore) {
+                bestScore = score;
+                move = i;
+              }
             }
           }
         }
@@ -166,7 +183,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               className="text-center"
             >
               <h2 className="sub-heading text-mono-950 mb-2">SYSTEM_STRUGGLE (1/3)</h2>
-              <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">FORCE A STALEMATE TO PROCEED.</p>
+              <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">DEFEAT THE SYSTEM TO PROCEED.</p>
               
               <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto mb-6">
                 {ticTacToeState.map((cell, i) => (
@@ -182,7 +199,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               </div>
               
               <p className={`text-[10px] font-black uppercase tracking-widest mb-6 ${
-                checkWinner(ticTacToeState) === 'draw' ? 'text-green-600 animate-pulse' : 'text-red-600'
+                checkWinner(ticTacToeState) === 'X' ? 'text-green-600 animate-pulse' : 'text-red-600'
               }`}>{gameMessage}</p>
               
               <div className="flex gap-4">
@@ -207,9 +224,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               <WordleGame 
                 onWin={() => setStep(4)} 
                 onLose={() => {
-                  // Re-start from Wordle if they fail, or punt them to step 1!
-                  setStep(1); 
-                  resetTicTacToe();
+                  // Game automatically restarts internally.
                 }} 
               />
             </motion.div>

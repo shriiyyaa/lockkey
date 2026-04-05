@@ -31,7 +31,13 @@ export default function WordleGame({ onWin, onLose }) {
           setTimeout(onWin, 1500);
         } else if (newGuesses.length >= MAX_GUESSES) {
           setGameOver(true);
-          setTimeout(onLose, 1500);
+          setTimeout(() => {
+            setGuesses([]);
+            setCurrentGuess('');
+            setGameOver(false);
+            setTargetWord(WORDS[Math.floor(Math.random() * WORDS.length)]);
+            if (onLose) onLose();
+          }, 2500);
         }
       } else if (e.key === 'Backspace') {
         setCurrentGuess((prev) => prev.slice(0, -1));
