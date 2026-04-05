@@ -80,20 +80,20 @@ export default function MathPuzzle({ onComplete }) {
       </div>
 
       {/* Answer input */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="number"
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="input-field text-center text-xl font-mono flex-1"
+          className="input-field text-center text-xl font-mono w-full sm:flex-1"
           placeholder="Your answer"
           id="math-challenge-input"
         />
         <button
           onClick={handleSubmit}
           id="btn-submit-math"
-          className="btn-primary flex-1 py-4"
+          className="btn-primary w-full sm:flex-1 py-4"
         >
           VERIFY
         </button>

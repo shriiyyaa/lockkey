@@ -66,15 +66,17 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     
     const winner = checkWinner(ticTacToeState);
     if (winner === 'O') {
-      setGameMessage("I TOLD YOU. SURRENDER.");
-      return;
+      setGameMessage("I TOLD YOU. SURRENDER. REBOOTING...");
+      const timer = setTimeout(resetTicTacToe, 2000);
+      return () => clearTimeout(timer);
     } else if (winner === 'X') {
         setGameMessage("SYSTEM DEFEATED. PROCEEDING TO VERBAL PROTOCOL...");
         const timer = setTimeout(() => setStep(3), 2000);
         return () => clearTimeout(timer);
     } else if (winner === 'draw') {
-        setGameMessage("STALEMATE DETECTED. YOU MUST *DEFEAT* ME. RETRY.");
-        return;
+        setGameMessage("STALEMATE DETECTED. YOU MUST *DEFEAT* ME. REBOOTING...");
+        const timer = setTimeout(resetTicTacToe, 2000);
+        return () => clearTimeout(timer);
     }
 
     if (currentPlayer === 'O') {
