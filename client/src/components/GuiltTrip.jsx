@@ -16,6 +16,18 @@ export default function GuiltTrip({ onComplete, onCancel }) {
   // Rationale State
   const [rationalMessage, setRationalMessage] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // Extreme Life Limit
+  const [lives, setLives] = useState(5);
+  const [isLockedOut, setIsLockedOut] = useState(false);
+
+  const handleLoss = () => {
+    setLives(prev => {
+      const next = prev - 1;
+      if (next <= 0) setIsLockedOut(true);
+      return next;
+    });
+  };
 
   // --- TIC TAC TOE LOGIC ---
   const checkWinner = (board) => {
@@ -70,6 +82,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     const winner = checkWinner(ticTacToeState);
     if (winner === 'O') {
       setGameMessage("I TOLD YOU. SURRENDER. REBOOTING...");
+      handleLoss(); // Consume life on loss
       const timer = setTimeout(resetTicTacToe, 2000);
       return () => clearTimeout(timer);
     } else if (winner === 'X') {
@@ -78,6 +91,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
         return () => clearTimeout(timer);
     } else if (winner === 'draw') {
         setGameMessage("STALEMATE DETECTED. YOU MUST *DEFEAT* ME. REBOOTING...");
+        handleLoss(); // Consume life on draw (failure to beat system)
         const timer = setTimeout(resetTicTacToe, 2000);
         return () => clearTimeout(timer);
     }
@@ -85,22 +99,11 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     if (currentPlayer === 'O') {
       // AI's turn! Wait slightly for fairness UX
       const timer = setTimeout(() => {
+        // PERFECT AI: No more error rate. 0.00% chance of random moves.
         let move = -1;
         
-        // 5% chance to make a random sub-optimal move to give user a tiny chance
-        if (Math.random() < 0.05) {
-          const emptyIndices = [];
-          for (let i = 0; i < 9; i++) {
-            if (ticTacToeState[i] === null) emptyIndices.push(i);
-          }
-          if (emptyIndices.length > 0) {
-            move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-          }
-        }
-
-        // Otherwise use perfect Minimax
-        if (move === -1) {
-          let bestScore = -Infinity;
+        // Use perfect Minimax exclusively for absolute difficulty
+        let bestScore = -Infinity;
           for (let i = 0; i < 9; i++) {
             if (ticTacToeState[i] === null) {
               let board = [...ticTacToeState];
@@ -153,7 +156,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     const uniqueWords = new Set(words);
     const hasRepetitiveJunk = /(.)\1{4,}/.test(text); // e.g. "aaaaa"
     
-    return text.length >= 200 && uniqueWords.size >= 10 && !hasRepetitiveJunk;
+    return text.length >= 400 && uniqueWords.size >= 20 && !hasRepetitiveJunk;
   };
 
   return (
@@ -161,10 +164,35 @@ export default function GuiltTrip({ onComplete, onCancel }) {
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="geometric-card max-w-lg w-full p-6 sm:p-8 overflow-y-auto max-h-[90vh] sm:max-h-[92vh] flex flex-col justify-center"
+        className="geometric-card max-w-lg w-full p-6 sm:p-8 overflow-y-auto max-h-[90vh] sm:max-h-[92vh] flex flex-col justify-center relative"
       >
+        {/* Extreme Barrier UI */}
+        {!isLockedOut && (
+          <div className="absolute top-2 right-4 flex gap-1 items-center">
+            <span className="text-[8px] font-black text-mono-400 uppercase tracking-widest">SYSTEM_STAMINA:</span>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={`w-2 h-2 border border-mono-950 ${i < lives ? 'bg-red-600 shadow-[1px_1px_0_0_#000]' : 'bg-mono-200'}`} />
+            ))}
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
-          {step === 1 && (
+          {isLockedOut ? (
+            <motion.div 
+              key="lockout"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12"
+            >
+              <h2 className="heading-primary text-red-600 mb-4 animate-pulse">ACCESS_DENIED</h2>
+              <p className="text-sm font-black text-mono-950 mb-8 uppercase tracking-tighter leading-relaxed">
+                "YOU HAVE EXHAUSTED ALL DECRYPTION ATTEMPTS. YOUR DISCIPLINE HAS FAILED. SYSTEM PERMANENTLY LOCKED FOR THIS SESSION."
+              </p>
+              <button onClick={onCancel} className="btn-primary w-full py-4 text-xs font-black uppercase tracking-[0.3em]">
+                EXIT_SHAMEFULLY
+              </button>
+            </motion.div>
+          ) : step === 1 ? (
             <motion.div 
               key="step1"
               initial={{ opacity: 0, x: 20 }}
@@ -236,9 +264,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               
               <WordleGame 
                 onWin={() => setStep(4)} 
-                onLose={() => {
-                  // Game automatically restarts internally.
-                }} 
+                onLose={handleLoss} 
               />
             </motion.div>
           )}
@@ -252,7 +278,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               className="text-center"
             >
               <h2 className="sub-heading text-mono-950 mb-2">DIGITS_CONVERGENCE (3/5)</h2>
-              <DigitsGame onWin={() => setStep(5)} />
+              <DigitsGame onWin={() => setStep(5)} onLose={handleLoss} />
             </motion.div>
           )}
 
@@ -265,7 +291,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               className="text-center"
             >
               <h2 className="sub-heading text-mono-950 mb-2">LOGIC_LINKS (4/5)</h2>
-              <ConnectionsGame onWin={() => setStep(6)} />
+              <ConnectionsGame onWin={() => setStep(6)} onLose={handleLoss} />
             </motion.div>
           )}
 
@@ -278,7 +304,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               className="text-center"
             >
               <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (5/5)</h2>
-              <StroopTest onComplete={() => setStep(7)} />
+              <StroopTest onComplete={() => setStep(7)} onLose={handleLoss} />
             </motion.div>
           )}
 
@@ -329,8 +355,8 @@ export default function GuiltTrip({ onComplete, onCancel }) {
                   
                   {!validateRationale(rationalMessage) && rationalMessage.length > 0 && (
                     <div className="text-[8px] text-left space-y-1 font-bold text-red-500 uppercase tracking-widest">
-                      {rationalMessage.length < 200 && <p>• MINIMUM 200 CHARACTERS ({200 - rationalMessage.length} REMAINING)</p>}
-                      {new Set(rationalMessage.trim().split(/\s+/).filter(w => w.length > 2)).size < 10 && <p>• MINIMUM 10 UNIQUE SUBSTANTIVE WORDS</p>}
+                      {rationalMessage.length < 400 && <p>• MINIMUM 400 CHARACTERS ({400 - rationalMessage.length} REMAINING)</p>}
+                      {new Set(rationalMessage.trim().split(/\s+/).filter(w => w.length > 2)).size < 20 && <p>• MINIMUM 20 UNIQUE SUBSTANTIVE WORDS</p>}
                       {/(.)\1{4,}/.test(rationalMessage) && <p>• GIBBERISH/REPETITIVE TEXT DETECTED</p>}
                     </div>
                   )}

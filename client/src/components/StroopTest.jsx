@@ -9,12 +9,14 @@ const COLORS = [
   { name: 'PURPLE', hex: '#a855f7' }
 ];
 
-export default function StroopTest({ onComplete }) {
+export default function StroopTest({ onComplete, onLose }) {
   const [score, setScore] = useState(0);
   const [target, setTarget] = useState({ text: '', color: '' });
   const [status, setStatus] = useState('idle'); // idle, correct, wrong
+  const [timeLeft, setTimeLeft] = useState(1.2);
 
   const generateRound = () => {
+    setTimeLeft(1.2);
     const textColorIndex = Math.floor(Math.random() * COLORS.length);
     let fontColorIndex = Math.floor(Math.random() * COLORS.length);
     
@@ -34,7 +36,26 @@ export default function StroopTest({ onComplete }) {
     generateRound();
   }, []);
 
+  useEffect(() => {
+    if (status !== 'idle' || score >= 10 || !target.text) return;
+    
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 0.1) {
+          clearInterval(timer);
+          handleChoice('TIMEOUT');
+          return 0;
+        }
+        return prev - 0.1;
+      });
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, [target, status, score]);
+
   const handleChoice = (choiceName) => {
+    if (status !== 'idle') return;
+    
     if (choiceName === target.colorName) {
       const newScore = score + 1;
       setScore(newScore);
@@ -50,10 +71,11 @@ export default function StroopTest({ onComplete }) {
     } else {
       setScore(0);
       setStatus('wrong');
+      onLose();
       setTimeout(() => {
         setStatus('idle');
         generateRound();
-      }, 500);
+      }, 800);
     }
   };
 
@@ -78,6 +100,15 @@ export default function StroopTest({ onComplete }) {
             }`}
           />
         ))}
+      </div>
+
+      {/* Timer Bar */}
+      <div className="w-full max-w-[200px] h-1 bg-mono-100 border border-mono-950 overflow-hidden">
+        <motion.div 
+          className="h-full bg-red-600"
+          animate={{ width: `${(timeLeft / 1.2) * 100}%` }}
+          transition={{ duration: 0.1, ease: "linear" }}
+        />
       </div>
 
       {/* The Target Word */}
@@ -128,7 +159,7 @@ export default function StroopTest({ onComplete }) {
               exit={{ opacity: 0 }}
               className="text-green-600 text-[10px] font-black uppercase tracking-widest"
             >
-              ACCURATE_STREAK: {score}/5
+              ACCURATE_STREAK: {score}/10
             </motion.p>
           )}
         </AnimatePresence>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const OPERATORS = ['+', '-', '×', '÷'];
 
-export default function DigitsGame({ onWin }) {
+export default function DigitsGame({ onWin, onLose }) {
   const [target, setTarget] = useState(0);
   const [numbers, setNumbers] = useState([]);
   const [selectedNumIndex, setSelectedNumIndex] = useState(null);
@@ -16,7 +16,7 @@ export default function DigitsGame({ onWin }) {
   }, []);
 
   const generatePuzzle = () => {
-    const nums = Array.from({ length: 5 }, () => Math.floor(Math.random() * 12) + 2);
+    const nums = Array.from({ length: 6 }, () => Math.floor(Math.random() * 15) + 3);
     let current = nums[0];
     const ops = ['+', '-', '*']; 
     
@@ -27,7 +27,7 @@ export default function DigitsGame({ onWin }) {
       else if (op === '*') current *= nums[i];
     }
 
-    if (current < 40 || current > 200) {
+    if (current < 200 || current > 800) {
       generatePuzzle(); 
       return;
     }
@@ -145,8 +145,11 @@ export default function DigitsGame({ onWin }) {
         <button onClick={undo} disabled={history.length === 0} className="btn-secondary flex-1 py-2 text-[10px] font-black uppercase tracking-widest opacity-80 disabled:opacity-30">
           UNDO_MOVE
         </button>
-        <button onClick={generatePuzzle} className="btn-secondary flex-1 py-2 text-[10px] font-black uppercase tracking-widest opacity-80">
-          NEW_PUZZLE
+        <button onClick={() => {
+          onLose();
+          generatePuzzle();
+        }} className="btn-secondary flex-1 py-2 text-[10px] font-black uppercase tracking-widest opacity-80">
+          RECALIBRATE (-1 L)
         </button>
       </div>
 

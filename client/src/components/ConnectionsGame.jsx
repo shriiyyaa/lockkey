@@ -2,23 +2,21 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORIES = [
-  { theme: 'FRUITS', words: ['APPLE', 'BANANA', 'MANGO', 'PEACH'] },
-  { theme: 'PLANETS', words: ['MARS', 'VENUS', 'SATURN', 'JUPITER'] },
-  { theme: 'COLORS', words: ['RED', 'BLUE', 'GREEN', 'YELLOW'] },
-  { theme: 'ANIMALS', words: ['TIGER', 'LION', 'ZEBRA', 'WOLF'] },
-  { theme: 'TECH', words: ['APPLE', 'GOOGLE', 'META', 'AMAZON'] },
-  { theme: 'OCEAN', words: ['WAVE', 'SAND', 'CORAL', 'SHARK'] },
-  { theme: 'SPACE', words: ['STAR', 'GALAXY', 'NEBULA', 'COMET'] },
-  { theme: 'SPORTS', words: ['SOCCER', 'TENNIS', 'RUGBY', 'GOLF'] },
-  { theme: 'MUSIC', words: ['JAZZ', 'ROCK', 'POP', 'BLUES'] },
-  { theme: 'WEATHER', words: ['RAIN', 'SNOW', 'STORM', 'WIND'] },
-  { theme: 'DRINKS', words: ['COFFEE', 'TEA', 'JUICE', 'SODA'] },
-  { theme: 'METALS', words: ['GOLD', 'IRON', 'STEEL', 'COPPER'] },
-  { theme: 'TREES', words: ['OAK', 'PINE', 'MAPLE', 'BIRCH'] },
-  { theme: 'BIRDS', words: ['EAGLE', 'ROBIN', 'OWL', 'HAWK'] }
+  { theme: 'PALINDROMES', words: ['RADAR', 'KAYAK', 'CIVIC', 'LEVEL'] },
+  { theme: 'GREEK LETTERS', words: ['DELTA', 'SIGMA', 'PI', 'OMEGA'] },
+  { theme: 'US STATES (HOMOPHONES)', words: ['ALASKA', 'MAIN', 'OREGON', 'NEW'] },
+  { theme: 'SILENT LETTERS', words: ['KNEAD', 'GNASH', 'WRATH', 'PITHY'] },
+  { theme: 'PERIODIC TABLE', words: ['IRON', 'LEAD', 'GOLD', 'TIN'] },
+  { theme: 'PLANETARY SYMBOLS', words: ['MARS', 'VENUS', 'CROSS', 'CRESCENT'] },
+  { theme: 'HOMOPHONES OF NUMBERS', words: ['WON', 'TOO', 'FOR', 'ATE'] },
+  { theme: 'CHESS PIECES', words: ['QUEEN', 'KING', 'ROOK', 'KNIGHT'] },
+  { theme: 'PHONETIC ALPHABET', words: ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'] },
+  { theme: 'WORDS WITH SYMBOLS', words: ['DOLLAR', 'HASH', 'STAR', 'AT'] },
+  { theme: 'NOBEL PRIZE CATS', words: ['PEACE', 'PHYSICS', 'ECON', 'MED'] },
+  { theme: 'COMPUTER PORTS', words: ['USB', 'HDMI', 'SATA', 'VGA'] }
 ];
 
-export default function ConnectionsGame({ onWin }) {
+export default function ConnectionsGame({ onWin, onLose }) {
   const [currentSet, setCurrentSet] = useState([]);
   const [selectedWords, setSelectedWords] = useState([]);
   const [foundCategories, setFoundCategories] = useState([]);
@@ -30,16 +28,17 @@ export default function ConnectionsGame({ onWin }) {
   }, []);
 
   const generateNewSet = () => {
-    // Pick 3 random categories
+    // Pick 4 random categories for extreme difficulty
     const available = [...CATEGORIES];
     const cat1 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
     const cat2 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
     const cat3 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
+    const cat4 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
     
-    const combined = [...cat1.words, ...cat2.words, ...cat3.words];
+    const combined = [...cat1.words, ...cat2.words, ...cat3.words, ...cat4.words];
     const shuffled = combined.sort(() => Math.random() - 0.5);
     
-    setCurrentSet([cat1, cat2, cat3]);
+    setCurrentSet([cat1, cat2, cat3, cat4]);
     setFoundCategories([]);
     setSelectedWords([]);
     setShuffleOrder(shuffled);
@@ -71,11 +70,12 @@ export default function ConnectionsGame({ onWin }) {
       setStatus('correct');
       setTimeout(() => setStatus('idle'), 1000);
 
-      if (nextFound.length === 3) {
+      if (nextFound.length === 4) {
         setTimeout(onWin, 1500);
       }
     } else {
       setStatus('wrong');
+      onLose();
       setTimeout(() => {
         setStatus('idle');
         setSelectedWords([]);
@@ -92,7 +92,7 @@ export default function ConnectionsGame({ onWin }) {
           STAGE 4: LOGIC_LINKS
         </h3>
         <p className="text-[9px] text-mono-500 font-bold uppercase tracking-widest leading-loose">
-          GROUP 12 WORDS INTO 3 CATEGORIES OF 4.
+          GROUP 16 WORDS INTO 4 CATEGORIES OF 4.
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function ConnectionsGame({ onWin }) {
       </div>
 
       {/* The Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-sm">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 w-full max-w-sm">
         {shuffleOrder.map(word => {
           const isSelected = selectedWords.includes(word);
           const isFound = isWordFound(word);
