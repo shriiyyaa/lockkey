@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WordleGame from './WordleGame';
-import ZenHold from './ZenHold';
 import StroopTest from './StroopTest';
+import DigitsGame from './DigitsGame';
+import ConnectionsGame from './ConnectionsGame';
 
 export default function GuiltTrip({ onComplete, onCancel }) {
-  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: ZenHold, 5: Stroop, 6: Rationalize
+  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Digits, 5: Connections, 6: Stroop, 7: Rationalize
   
   // TicTacToe State
   const [ticTacToeState, setTicTacToeState] = useState(Array(9).fill(null));
@@ -242,8 +243,8 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">CALMNESS_TEST (3/5)</h2>
-              <ZenHold onComplete={() => setStep(5)} />
+              <h2 className="sub-heading text-mono-950 mb-2">DIGITS_CONVERGENCE (3/5)</h2>
+              <DigitsGame onWin={() => setStep(5)} />
             </motion.div>
           )}
 
@@ -255,8 +256,8 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (4/5)</h2>
-              <StroopTest onComplete={() => setStep(6)} />
+              <h2 className="sub-heading text-mono-950 mb-2">LOGIC_LINKS (4/5)</h2>
+              <ConnectionsGame onWin={() => setStep(6)} />
             </motion.div>
           )}
 
@@ -268,7 +269,20 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               exit={{ opacity: 0, x: -20 }}
               className="text-center"
             >
-              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK (5/5)</h2>
+              <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (5/5)</h2>
+              <StroopTest onComplete={() => setStep(7)} />
+            </motion.div>
+          )}
+
+          {step === 7 && (
+            <motion.div 
+              key="step7"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="text-center"
+            >
+              <h2 className="sub-heading text-mono-950 mb-2">INTEGRITY_CHECK (FINAL)</h2>
               <p className="text-[10px] text-mono-400 font-bold mb-6 uppercase tracking-widest">EXPLAIN THE RATIONALE FOR THIS FAILURE.</p>
               
               <textarea
