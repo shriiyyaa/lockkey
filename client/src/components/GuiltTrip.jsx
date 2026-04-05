@@ -124,7 +124,6 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               }
             }
           }
-        }
         if (move !== -1) {
           const newState = [...ticTacToeState];
           newState[move] = 'O';
@@ -221,7 +220,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
                 </button>
               </div>
             </motion.div>
-          )}
+          ) : null}
 
           {step === 2 && (
             <motion.div 

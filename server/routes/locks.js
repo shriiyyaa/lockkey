@@ -304,6 +304,8 @@ router.post('/:id/fuck-it', async (req, res) => {
     console.error('Fuck-it bypass error:', err);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
 // POST /api/locks/:id/fail-bypass — Mark bypass as failed
 router.post('/:id/fail-bypass', async (req, res) => {
   try {
