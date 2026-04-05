@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'https://lockkey-h8ib.onrender.com/api',
-  timeout: 5000,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json'
   }

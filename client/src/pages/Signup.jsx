@@ -24,7 +24,11 @@ export default function Signup() {
       navigate('/');
     } catch (err) {
       if (!err.response) {
-        setError('SERVER_OFFLINE: UNABLE TO CONNECT TO PROTOCOL');
+        if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+          setError('PROTOCOL_WARMUP: SYSTEM INITIALIZING. PLEASE WAIT 30s AND RETRY.');
+        } else {
+          setError('SERVER_OFFLINE: UNABLE TO CONNECT TO PROTOCOL');
+        }
       } else {
         setError(err.response.data.message || 'Failed to create account');
       }
