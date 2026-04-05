@@ -101,7 +101,7 @@ export default function WordleGame({ onWin, onLose }) {
                 initial={{ rotateX: -90 }}
                 animate={{ rotateX: 0 }}
                 transition={{ delay: j * 0.1, duration: 0.3 }}
-                className={`w-12 h-12 flex items-center justify-center font-black text-xl border-2 border-mono-950 ${bgColor} ${textColor} uppercase`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center font-black text-lg sm:text-xl border-2 border-mono-950 ${bgColor} ${textColor} uppercase`}
               >
                 {char}
               </motion.div>
@@ -115,12 +115,12 @@ export default function WordleGame({ onWin, onLose }) {
       rows.push(
         <div key={i} className="flex gap-2 justify-center mb-2">
           {currentGuess.split('').map((char, j) => (
-            <div key={j} className="w-12 h-12 flex items-center justify-center font-black text-xl border-2 border-mono-950 bg-mono-100 text-mono-950 uppercase shadow-[2px_2px_0_0_#3f3f46]">
+            <div key={j} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center font-black text-lg sm:text-xl border-2 border-mono-950 bg-mono-100 text-mono-950 uppercase shadow-[2px_2px_0_0_#3f3f46]">
               {char}
             </div>
           ))}
           {emptyCells.map((_, j) => (
-            <div key={`empty-${j}`} className="w-12 h-12 flex items-center justify-center border-2 border-mono-300 bg-transparent"></div>
+            <div key={`empty-${j}`} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center border-2 border-mono-300 bg-transparent"></div>
           ))}
         </div>
       );
@@ -129,7 +129,7 @@ export default function WordleGame({ onWin, onLose }) {
       rows.push(
         <div key={i} className="flex gap-2 justify-center mb-2">
           {Array(WORD_LENGTH).fill('').map((_, j) => (
-            <div key={`blank-${j}`} className="w-12 h-12 flex items-center justify-center border-2 border-mono-200 bg-transparent"></div>
+            <div key={`blank-${j}`} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center border-2 border-mono-200 bg-transparent"></div>
           ))}
         </div>
       );
@@ -168,7 +168,7 @@ export default function WordleGame({ onWin, onLose }) {
       )}
       
       {/* Virtual Keyboard */}
-      <div className="flex flex-col gap-1 w-full max-w-[320px]">
+      <div className="flex flex-col gap-1 w-full max-w-full sm:max-w-[320px]">
         {keyboardRows.map((row, i) => (
           <div key={i} className="flex gap-1 justify-center">
             {row.map(key => {

@@ -131,7 +131,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="geometric-card max-w-lg w-full p-8"
+        className="geometric-card max-w-lg w-full p-4 sm:p-8 overflow-y-auto max-h-[95vh]"
       >
         <AnimatePresence mode="wait">
           {step === 1 && (
