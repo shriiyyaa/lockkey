@@ -12,16 +12,30 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'https://lockkey-three.vercel.app', 'https://lockkey-olive.vercel.app'];
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:3000', 
+  'http://localhost:5000',
+  'https://lockkey-three.vercel.app', 
+  'https://lockkey-olive.vercel.app'
+];
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.indexOf(origin) !== -1 || 
+                    origin.endsWith('.vercel.app') ||
+                    origin.includes('localhost');
+                    
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.warn(`CORS: Origin ${origin} blocked.`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -46,5 +60,8 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`\n🔐 lockkey server running on port ${PORT}`);
-  console.log(`   http://localhost:${PORT}/api/health\n`);
+  console.log(`   Mode: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   Database: ${process.env.DATABASE_URL ? 'PostgreSQL (Render)' : 'SQLite (Local)'}`);
+  console.log(`   Frontend Whitelist: ${allowedOrigins.join(', ')}`);
+  console.log(`   Health Check: http://localhost:${PORT}/api/health\n`);
 });

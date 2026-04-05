@@ -11,28 +11,27 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('lockkey_token');
     const savedUser = localStorage.getItem('lockkey_user');
 
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        // Verify token is still valid
-        api.get('/auth/me')
-          .then(res => {
-            setUser(res.data);
-            localStorage.setItem('lockkey_user', JSON.stringify(res.data));
-          })
-          .catch(() => {
-            localStorage.removeItem('lockkey_token');
-            localStorage.removeItem('lockkey_user');
-            setUser(null);
-          })
-          .finally(() => setLoading(false));
-      } catch (e) {
-        // If JSON.parse fails, clear corrupted config
-        localStorage.removeItem('lockkey_token');
-        localStorage.removeItem('lockkey_user');
-        setUser(null);
-        setLoading(false);
+    // RECOVERY MODE: If we have a token, we can ALWAYS try to fetch the user profile
+    // even if the cached 'lockkey_user' is missing or corrupted.
+    if (token) {
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch (e) {
+          console.error("AuthContext: Cached user corrupted, fetching fresh...");
+        }
       }
+
+      api.get('/auth/me')
+        .then(res => {
+          setUser(res.data);
+          localStorage.setItem('lockkey_user', JSON.stringify(res.data));
+        })
+        .catch(err => {
+          console.error("AuthContext: Session verification failed:", err.message);
+          logout(); // Clear invalid token
+        })
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }

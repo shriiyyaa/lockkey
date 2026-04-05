@@ -17,9 +17,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 responses
+// Performance interceptor to detect cold starts
+api.interceptors.request.use((config) => {
+  config.metadata = { startTime: new Date() };
+  return config;
+});
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const duration = new Date() - response.config.metadata.startTime;
+    if (duration > 3000) {
+      console.warn(`[API] SLOW_RESPONSE: ${response.config.url} took ${duration}ms (Potential Cold Start)`);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('lockkey_token');
