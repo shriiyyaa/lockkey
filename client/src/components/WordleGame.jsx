@@ -247,8 +247,8 @@ export default function WordleGame({ onWin, onLose }) {
                 <button
                   key={key}
                   onClick={() => handleVirtualKey(key)}
-                  className={`h-10 text-[10px] font-black border-2 border-mono-950 flex items-center justify-center transition-colors active:translate-y-px 
-                    ${isAction ? 'px-2 min-w-[3rem]' : 'flex-1'}
+                  className={`h-9 sm:h-10 text-[9px] sm:text-[10px] font-black border-2 border-mono-950 flex items-center justify-center transition-colors active:translate-y-px 
+                    ${isAction ? 'px-1 sm:px-2 min-w-[2.5rem] sm:min-w-[3rem]' : 'flex-1'}
                     ${keyBg} ${keyText}
                   `}
                 >

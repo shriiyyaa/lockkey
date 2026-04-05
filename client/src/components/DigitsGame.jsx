@@ -16,9 +16,9 @@ export default function DigitsGame({ onWin }) {
   }, []);
 
   const generatePuzzle = () => {
-    const nums = Array.from({ length: 4 }, () => Math.floor(Math.random() * 12) + 2);
+    const nums = Array.from({ length: 5 }, () => Math.floor(Math.random() * 12) + 2);
     let current = nums[0];
-    const ops = ['+', '-', '*']; // Simplified for generation
+    const ops = ['+', '-', '*']; 
     
     for (let i = 1; i < nums.length; i++) {
       const op = ops[Math.floor(Math.random() * ops.length)];
@@ -27,8 +27,8 @@ export default function DigitsGame({ onWin }) {
       else if (op === '*') current *= nums[i];
     }
 
-    if (current < 20 || current > 120) {
-      generatePuzzle(); // Re-roll if too easy or too hard
+    if (current < 40 || current > 200) {
+      generatePuzzle(); 
       return;
     }
 
@@ -100,23 +100,23 @@ export default function DigitsGame({ onWin }) {
       </div>
 
       {/* Target display */}
-      <div className="bg-mono-950 p-6 w-32 h-32 rounded-full flex flex-col items-center justify-center shadow-[0_8px_0_0_#3f3f46]">
-        <span className="text-[10px] font-black text-mono-400 tracking-widest uppercase mb-1">TARGET</span>
-        <span className="text-4xl font-black text-ivory font-mono">{target}</span>
+      <div className="bg-mono-950 p-4 w-24 h-24 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center shadow-[0_6px_0_0_#3f3f46]">
+        <span className="text-[8px] font-black text-mono-400 tracking-widest uppercase mb-0.5">TARGET</span>
+        <span className="text-3xl sm:text-4xl font-black text-ivory font-mono">{target}</span>
       </div>
 
       {/* Numbers */}
-      <div className="flex gap-4 flex-wrap justify-center max-w-[280px]">
+      <div className="flex gap-2 sm:gap-4 flex-wrap justify-center max-w-[300px]">
         {numbers.map((n, i) => (
           <button
             key={n.id}
             onClick={() => handleNumClick(i)}
             disabled={!n.active}
-            className={`w-14 h-14 sm:w-16 sm:h-16 border-2 font-black text-xl transition-all duration-200 flex items-center justify-center
+            className={`w-12 h-12 sm:w-16 sm:h-16 border-2 font-black text-lg transition-all duration-200 flex items-center justify-center
               ${!n.active ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}
               ${selectedNumIndex === i 
                 ? 'bg-mono-950 text-ivory border-mono-950 shadow-none -translate-y-1' 
-                : 'bg-ivory text-mono-950 border-mono-950 shadow-[4px_4px_0_0_#3f3f46] hover:bg-mono-50'}
+                : 'bg-ivory text-mono-950 border-mono-950 shadow-[3px_3px_0_0_#3f3f46] hover:bg-mono-50'}
             `}
           >
             {n.val}

@@ -87,8 +87,8 @@ export default function GuiltTrip({ onComplete, onCancel }) {
       const timer = setTimeout(() => {
         let move = -1;
         
-        // 35% chance to make a random sub-optimal move to give user a chance
-        if (Math.random() < 0.35) {
+        // 5% chance to make a random sub-optimal move to give user a tiny chance
+        if (Math.random() < 0.05) {
           const emptyIndices = [];
           for (let i = 0; i < 9; i++) {
             if (ticTacToeState[i] === null) emptyIndices.push(i);
@@ -145,7 +145,15 @@ export default function GuiltTrip({ onComplete, onCancel }) {
     setIsAnalyzing(true);
     setTimeout(() => {
       onComplete();
-    }, 4000); // 4 second "analysis"
+    }, 15000); // 15 second mandatory "reflection" wait
+  };
+
+  const validateRationale = (text) => {
+    const words = text.trim().split(/\s+/).filter(w => w.length > 2);
+    const uniqueWords = new Set(words);
+    const hasRepetitiveJunk = /(.)\1{4,}/.test(text); // e.g. "aaaaa"
+    
+    return text.length >= 200 && uniqueWords.size >= 10 && !hasRepetitiveJunk;
   };
 
   return (
@@ -153,7 +161,7 @@ export default function GuiltTrip({ onComplete, onCancel }) {
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="geometric-card max-w-lg w-full p-4 sm:p-8 overflow-y-auto max-h-[95vh]"
+        className="geometric-card max-w-lg w-full p-6 sm:p-8 overflow-y-auto max-h-[90vh] sm:max-h-[92vh] flex flex-col justify-center"
       >
         <AnimatePresence mode="wait">
           {step === 1 && (
@@ -294,28 +302,39 @@ export default function GuiltTrip({ onComplete, onCancel }) {
               
               {isAnalyzing ? (
                 <div className="py-4">
-                  <p className="text-[10px] font-black text-mono-500 uppercase tracking-[0.3em] mb-4 animate-pulse">ANALYZING_ANXIETY_LEVELS...</p>
+                  <p className="text-[10px] font-black text-mono-500 uppercase tracking-[0.3em] mb-4 animate-pulse text-center">FINAL_PSYCHOLOGICAL_REVIEW_IN_PROGRESS...</p>
                   <div className="h-2 bg-mono-100 border-2 border-mono-950 overflow-hidden">
                     <motion.div 
-                      className="h-full bg-mono-950"
+                      className="h-full bg-red-600"
                       initial={{ width: 0 }}
                       animate={{ width: "100%" }}
-                      transition={{ duration: 4 }}
+                      transition={{ duration: 15, ease: "linear" }}
                     />
                   </div>
+                  <p className="text-[8px] text-mono-400 mt-4 text-center uppercase tracking-widest">DO NOT CLOSE. REFLECT ON YOUR FAILURE.</p>
                 </div>
               ) : (
-                <button 
-                  disabled={rationalMessage.length < 50}
-                  onClick={runAnalysis}
-                  className={`w-full py-4 rounded-none font-black uppercase tracking-[0.2em] border-2 transition-all duration-200 ${
-                    rationalMessage.length >= 50
-                      ? 'bg-red-600 border-mono-950 text-ivory shadow-[4px_4px_0_0_#991b1b] hover:-translate-x-0.5 hover:-translate-y-0.5'
-                      : 'bg-mono-100 border-mono-200 text-mono-400 opacity-50'
-                  }`}
-                >
-                  SUBMIT_RATIONALE ({Math.max(0, 50 - rationalMessage.length)} MORE CHARS)
-                </button>
+                <div className="space-y-4">
+                  <button 
+                    disabled={!validateRationale(rationalMessage)}
+                    onClick={runAnalysis}
+                    className={`w-full py-4 rounded-none font-black uppercase tracking-[0.2em] border-2 transition-all duration-200 ${
+                      validateRationale(rationalMessage)
+                        ? 'bg-red-600 border-mono-950 text-ivory shadow-[4px_4px_0_0_#991b1b] hover:-translate-x-0.5 hover:-translate-y-0.5'
+                        : 'bg-mono-100 border-mono-200 text-mono-400 opacity-50'
+                    }`}
+                  >
+                    SUBMIT_FINAL_RATIONALE
+                  </button>
+                  
+                  {!validateRationale(rationalMessage) && rationalMessage.length > 0 && (
+                    <div className="text-[8px] text-left space-y-1 font-bold text-red-500 uppercase tracking-widest">
+                      {rationalMessage.length < 200 && <p>• MINIMUM 200 CHARACTERS ({200 - rationalMessage.length} REMAINING)</p>}
+                      {new Set(rationalMessage.trim().split(/\s+/).filter(w => w.length > 2)).size < 10 && <p>• MINIMUM 10 UNIQUE SUBSTANTIVE WORDS</p>}
+                      {/(.)\1{4,}/.test(rationalMessage) && <p>• GIBBERISH/REPETITIVE TEXT DETECTED</p>}
+                    </div>
+                  )}
+                </div>
               )}
             </motion.div>
           )}

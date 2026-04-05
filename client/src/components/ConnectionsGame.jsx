@@ -11,7 +11,11 @@ const CATEGORIES = [
   { theme: 'SPACE', words: ['STAR', 'GALAXY', 'NEBULA', 'COMET'] },
   { theme: 'SPORTS', words: ['SOCCER', 'TENNIS', 'RUGBY', 'GOLF'] },
   { theme: 'MUSIC', words: ['JAZZ', 'ROCK', 'POP', 'BLUES'] },
-  { theme: 'WEATHER', words: ['RAIN', 'SNOW', 'STORM', 'WIND'] }
+  { theme: 'WEATHER', words: ['RAIN', 'SNOW', 'STORM', 'WIND'] },
+  { theme: 'DRINKS', words: ['COFFEE', 'TEA', 'JUICE', 'SODA'] },
+  { theme: 'METALS', words: ['GOLD', 'IRON', 'STEEL', 'COPPER'] },
+  { theme: 'TREES', words: ['OAK', 'PINE', 'MAPLE', 'BIRCH'] },
+  { theme: 'BIRDS', words: ['EAGLE', 'ROBIN', 'OWL', 'HAWK'] }
 ];
 
 export default function ConnectionsGame({ onWin }) {
@@ -26,15 +30,16 @@ export default function ConnectionsGame({ onWin }) {
   }, []);
 
   const generateNewSet = () => {
-    // Pick 2 random categories
+    // Pick 3 random categories
     const available = [...CATEGORIES];
     const cat1 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
     const cat2 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
+    const cat3 = available.splice(Math.floor(Math.random() * available.length), 1)[0];
     
-    const combined = [...cat1.words, ...cat2.words];
+    const combined = [...cat1.words, ...cat2.words, ...cat3.words];
     const shuffled = combined.sort(() => Math.random() - 0.5);
     
-    setCurrentSet([cat1, cat2]);
+    setCurrentSet([cat1, cat2, cat3]);
     setFoundCategories([]);
     setSelectedWords([]);
     setShuffleOrder(shuffled);
@@ -66,7 +71,7 @@ export default function ConnectionsGame({ onWin }) {
       setStatus('correct');
       setTimeout(() => setStatus('idle'), 1000);
 
-      if (nextFound.length === 2) {
+      if (nextFound.length === 3) {
         setTimeout(onWin, 1500);
       }
     } else {
@@ -87,18 +92,18 @@ export default function ConnectionsGame({ onWin }) {
           STAGE 4: LOGIC_LINKS
         </h3>
         <p className="text-[9px] text-mono-500 font-bold uppercase tracking-widest leading-loose">
-          GROUP 8 WORDS INTO 2 CATEGORIES OF 4.
+          GROUP 12 WORDS INTO 3 CATEGORIES OF 4.
         </p>
       </div>
 
       {/* Found Categories */}
-      <div className="w-full flex flex-col gap-2 mb-2">
+      <div className="w-full flex flex-col gap-1.5 mb-2">
         {foundCategories.map(cat => (
           <motion.div 
             key={cat.theme}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-mono-950 text-ivory p-4 border-2 border-mono-950 text-center font-black uppercase text-xs tracking-widest shadow-[4px_4px_0_0_#3f3f46]"
+            className="bg-mono-950 text-ivory p-3 border-2 border-mono-950 text-center font-black uppercase text-[10px] tracking-widest shadow-[3px_3px_0_0_#3f3f46]"
           >
             {cat.theme}: {cat.words.join(', ')}
           </motion.div>
@@ -106,7 +111,7 @@ export default function ConnectionsGame({ onWin }) {
       </div>
 
       {/* The Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full max-w-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-sm">
         {shuffleOrder.map(word => {
           const isSelected = selectedWords.includes(word);
           const isFound = isWordFound(word);

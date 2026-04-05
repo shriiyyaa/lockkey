@@ -39,7 +39,7 @@ export default function StroopTest({ onComplete }) {
       const newScore = score + 1;
       setScore(newScore);
       setStatus('correct');
-      if (newScore >= 5) {
+      if (newScore >= 10) {
         setTimeout(onComplete, 1000);
       } else {
         setTimeout(() => {
@@ -61,7 +61,7 @@ export default function StroopTest({ onComplete }) {
     <div className="flex flex-col items-center justify-center space-y-8 py-6">
       <div className="text-center">
         <h3 className="text-xl font-black text-mono-950 uppercase tracking-tighter mb-2">
-          STAGE 4: COLOR_CONFLICT
+          STAGE 5: COGNITIVE_CONFLICT
         </h3>
         <p className="text-[10px] text-mono-500 font-bold uppercase tracking-widest leading-loose">
           SELECT THE **FONT COLOR**, IGNORE THE TEXT MEANING.
@@ -69,11 +69,11 @@ export default function StroopTest({ onComplete }) {
       </div>
 
       {/* Progress indicators */}
-      <div className="flex gap-2">
-        {[1, 2, 3, 4, 5].map((i) => (
+      <div className="flex gap-1.5 flex-wrap justify-center">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
           <div
             key={i}
-            className={`w-3 h-3 border-2 border-mono-950 transition-colors ${
+            className={`w-2.5 h-2.5 border-2 border-mono-950 transition-colors ${
               score >= i ? 'bg-green-500' : 'bg-mono-100'
             }`}
           />
