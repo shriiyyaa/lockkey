@@ -56,6 +56,10 @@ const Lock = sequelize.define('Lock', {
   challengeCompleted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  isBypassFailed: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   }
 }, {
   timestamps: true,

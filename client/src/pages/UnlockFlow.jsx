@@ -252,14 +252,20 @@ export default function UnlockFlow() {
             </p>
 
             <div className="mt-12 pt-8 border-t border-ivory/5">
-              <button
-                onClick={handleFuckIt}
-                disabled={loading}
-                className="text-[10px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-[0.3em] transition-colors"
-                id="btn-fuck-it-unlocking"
-              >
-                FUCK IT — I CAN'T WAIT
-              </button>
+              {lock.isBypassFailed ? (
+                <p className="text-[10px] font-black text-red-600/40 uppercase tracking-[0.2em] italic">
+                  BYPASS_PROTOCOL: PERMANENT_LOCKOUT_ACTIVE. NO SHORTCUTS REMAIN.
+                </p>
+              ) : (
+                <button
+                  onClick={handleFuckIt}
+                  disabled={loading}
+                  className="text-[10px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-[0.3em] transition-colors"
+                  id="btn-fuck-it-unlocking"
+                >
+                  FUCK IT — I CAN'T WAIT
+                </button>
+              )}
             </div>
           </motion.div>
         )}
@@ -302,14 +308,20 @@ export default function UnlockFlow() {
               </button>
 
               <div className="mt-8">
-                <button
-                  onClick={handleFuckIt}
-                  disabled={loading}
-                  className="text-[10px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-[0.3em] transition-colors"
-                  id="btn-fuck-it-active"
-                >
-                  FUCK IT — EMERGENCY BYPASS
-                </button>
+                {lock.isBypassFailed ? (
+                  <p className="text-[10px] font-black text-red-600/40 uppercase tracking-[0.2em] italic">
+                    BYPASS_PROTOCOL: PERMANENT_LOCKOUT_ACTIVE. NO SHORTCUTS REMAIN.
+                  </p>
+                ) : (
+                  <button
+                    onClick={handleFuckIt}
+                    disabled={loading}
+                    className="text-[10px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-[0.3em] transition-colors"
+                    id="btn-fuck-it-active"
+                  >
+                    FUCK IT — EMERGENCY BYPASS
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>
@@ -318,6 +330,7 @@ export default function UnlockFlow() {
 
       {showGuilt && (
         <GuiltTrip 
+          lockId={lock.id}
           onComplete={handleGuiltComplete}
           onCancel={() => setShowGuilt(false)}
         />

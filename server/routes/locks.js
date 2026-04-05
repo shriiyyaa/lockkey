@@ -83,6 +83,7 @@ router.get('/', async (req, res) => {
         earlyUnlockRequestedAt: lock.earlyUnlockRequestedAt,
         earlyUnlockDelay: lock.earlyUnlockDelay,
         challengeCompleted: lock.challengeCompleted,
+        isBypassFailed: lock.isBypassFailed,
         createdAt: lock.createdAt
       });
     }
@@ -159,6 +160,7 @@ router.get('/:id', async (req, res) => {
       earlyUnlockRequestedAt: lock.earlyUnlockRequestedAt,
       earlyUnlockDelay: lock.earlyUnlockDelay,
       challengeCompleted: lock.challengeCompleted,
+      isBypassFailed: lock.isBypassFailed,
       createdAt: lock.createdAt
     });
   } catch (err) {
@@ -300,6 +302,23 @@ router.post('/:id/fuck-it', async (req, res) => {
     res.json({ message: 'Emergency bypass activated. Lock cleared.' });
   } catch (err) {
     console.error('Fuck-it bypass error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+// POST /api/locks/:id/fail-bypass — Mark bypass as failed
+router.post('/:id/fail-bypass', async (req, res) => {
+  try {
+    const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });
+
+    if (!lock) {
+      return res.status(404).json({ message: 'Lock not found' });
+    }
+
+    lock.isBypassFailed = true;
+    await lock.save();
+
+    res.json({ message: 'Emergency bypass protocol deactivated permanently for this lock.' });
+  } catch (err) {
+    console.error('Fail bypass error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

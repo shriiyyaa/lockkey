@@ -5,7 +5,7 @@ import StroopTest from './StroopTest';
 import DigitsGame from './DigitsGame';
 import ConnectionsGame from './ConnectionsGame';
 
-export default function GuiltTrip({ onComplete, onCancel }) {
+export default function GuiltTrip({ lockId, onComplete, onCancel }) {
   const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Digits, 5: Connections, 6: Stroop, 7: Rationalize
   
   // TicTacToe State
@@ -24,7 +24,15 @@ export default function GuiltTrip({ onComplete, onCancel }) {
   const handleLoss = () => {
     setLives(prev => {
       const next = prev - 1;
-      if (next <= 0) setIsLockedOut(true);
+      if (next <= 0) {
+        setIsLockedOut(true);
+        // Persist the failure to the backend
+        if (lockId) {
+          import('../utils/api').then(m => {
+            m.default.post(`/locks/${lockId}/fail-bypass`).catch(console.error);
+          });
+        }
+      }
       return next;
     });
   };
