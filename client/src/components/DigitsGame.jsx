@@ -16,9 +16,10 @@ export default function DigitsGame({ onWin, onLose }) {
   }, []);
 
   const generatePuzzle = () => {
-    const nums = Array.from({ length: 6 }, () => Math.floor(Math.random() * 15) + 3);
+    // Stage 3 Hardening: Larger numbers, higher targets
+    const nums = Array.from({ length: 6 }, () => Math.floor(Math.random() * 25) + 5);
     let current = nums[0];
-    const ops = ['+', '-', '*']; 
+    const ops = ['+', '-', '*', '+', '*']; // Favor multiplication for larger targets
     
     for (let i = 1; i < nums.length; i++) {
       const op = ops[Math.floor(Math.random() * ops.length)];
@@ -27,7 +28,8 @@ export default function DigitsGame({ onWin, onLose }) {
       else if (op === '*') current *= nums[i];
     }
 
-    if (current < 200 || current > 800) {
+    // Extreme targets: 300 to 1500
+    if (current < 300 || current > 1500) {
       generatePuzzle(); 
       return;
     }

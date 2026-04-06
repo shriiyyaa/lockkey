@@ -13,7 +13,19 @@ const CATEGORIES = [
   { theme: 'PHONETIC ALPHABET', words: ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'] },
   { theme: 'WORDS WITH SYMBOLS', words: ['DOLLAR', 'HASH', 'STAR', 'AT'] },
   { theme: 'NOBEL PRIZE CATS', words: ['PEACE', 'PHYSICS', 'ECON', 'MED'] },
-  { theme: 'COMPUTER PORTS', words: ['USB', 'HDMI', 'SATA', 'VGA'] }
+  { theme: 'COMPUTER PORTS', words: ['USB', 'HDMI', 'SATA', 'VGA'] },
+  { theme: 'TERMS IN GENETICS', words: ['ALLELE', 'LOCUS', 'TRAIT', 'GENE'] },
+  { theme: 'TYPES OF QUARKS', words: ['UP', 'DOWN', 'TOP', 'BOTTOM'] },
+  { theme: 'GEOLOGICAL EPOCHS', words: ['EOCENE', 'MIOCENE', 'PLIOCENE', 'HOLOCENE'] },
+  { theme: 'CHESS ENGINE NAMES', words: ['STOCKFISH', 'LEELA', 'KOMODO', 'HOUDINI'] },
+  { theme: 'ANCIENT CITIES', words: ['UR', 'BABYLON', 'THEBES', 'CARTHAGE'] },
+  { theme: 'TYPES OF CLOUDS', words: ['CIRRUS', 'STRATUS', 'CUMULUS', 'NIMBUS'] },
+  { theme: 'SUBATOMIC PARTICLES', words: ['MUON', 'TAU', 'NEUTRINO', 'PHOTON'] },
+  { theme: 'FAMOUS CRYPTOGRAPHERS', words: ['SHANNON', 'TURING', 'RIVEST', 'ADLEMAN'] },
+  { theme: 'ARCHAIC UNITS', words: ['CUBIT', 'FATHOM', 'LEAGUE', 'FURLONG'] },
+  { theme: 'TYPES OF TEA', words: ['OOLONG', 'PUERH', 'MATCHA', 'SENCHA'] },
+  { theme: 'MUSICAL TEMPO', words: ['ADAGIO', 'PRESTO', 'LARGO', 'ANDANTE'] },
+  { theme: 'TYPES OF PASTA', words: ['FUSILLI', 'PENNE', 'FARFALLE', 'RIGATONI'] }
 ];
 
 export default function ConnectionsGame({ onWin, onLose }) {

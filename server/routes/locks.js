@@ -178,6 +178,10 @@ router.post('/:id/request-unlock', async (req, res) => {
       return res.status(404).json({ message: 'Lock not found' });
     }
 
+    if (lock.isBypassFailed) {
+      return res.status(403).json({ message: 'Early unlock protocol permanently deactivated for this lock configuration.' });
+    }
+
     if (lock.status !== 'active') {
       return res.status(400).json({ message: 'Lock is not active' });
     }
@@ -209,6 +213,10 @@ router.post('/:id/complete-challenge', async (req, res) => {
 
     if (!lock) {
       return res.status(404).json({ message: 'Lock not found' });
+    }
+
+    if (lock.isBypassFailed && lock.status !== 'completed') {
+      return res.status(403).json({ message: 'Emergency decryption challenge disabled. Absolute discipline required.' });
     }
 
     // For early unlock: check if delay has passed
@@ -265,6 +273,10 @@ router.post('/:id/reveal', async (req, res) => {
 
     if (!lock) {
       return res.status(404).json({ message: 'Lock not found' });
+    }
+
+    if (lock.isBypassFailed && lock.status !== 'completed') {
+      return res.status(403).json({ message: 'Access permanently revoked due to repeated gauntlet failure.' });
     }
 
     if (lock.status !== 'completed') {
