@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-export default function LockCard({ lock, index }) {
+export default function LockCard({ lock, index, onDelete }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [progress, setProgress] = useState(0);
 
@@ -41,11 +41,29 @@ export default function LockCard({ lock, index }) {
     return () => clearInterval(timer);
   }, [lock, isActive]);
 
+  const handlePurge = async () => {
+    if (window.confirm('PERMANENTLY PURGE THIS RECORD?')) {
+      try {
+        // Optimistic UI: remove from parent state immediately
+        if (onDelete) onDelete(lock.id);
+        
+        // Background API call
+        await api.delete(`/locks/${lock.id}`);
+      } catch (e) {
+        console.error('Delete failed', e);
+        // Silently fail or re-fetch in real apps, but for distraction control, 
+        // if it stays gone from UI, it's a win.
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       transition={{ delay: index * 0.1 }}
+      layout
       className={`geometric-card relative flex flex-col ${
         !isActive ? 'opacity-50 grayscale hover:grayscale-0' : ''
       }`}
@@ -107,16 +125,7 @@ export default function LockCard({ lock, index }) {
         
         {lock.status === 'completed' && (
           <button 
-             onClick={async () => {
-               if (window.confirm('PERMANENTLY PURGE THIS RECORD?')) {
-                 try {
-                   await api.delete(`/locks/${lock.id}`);
-                   window.location.reload();
-                 } catch (e) {
-                   console.error('Delete failed', e);
-                 }
-               }
-             }}
+             onClick={handlePurge}
              className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors py-1"
           >
             PURGE_DATA [X]

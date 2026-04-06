@@ -35,6 +35,10 @@ export default function Dashboard() {
     }
   };
 
+  const handleLockDelete = (id) => {
+    setLocks(prev => prev.filter(lock => lock.id !== id));
+  };
+
   const filteredLocks = locks.filter(lock => {
     if (filter === 'active') return lock.status === 'active' || lock.status === 'unlocking';
     if (filter === 'completed') return lock.status === 'completed';
@@ -107,7 +111,12 @@ export default function Dashboard() {
           {filteredLocks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredLocks.map((lock, index) => (
-                <LockCard key={lock.id} lock={lock} index={index} />
+                <LockCard 
+                  key={lock.id} 
+                  lock={lock} 
+                  index={index} 
+                  onDelete={handleLockDelete} 
+                />
               ))}
             </div>
           ) : (
