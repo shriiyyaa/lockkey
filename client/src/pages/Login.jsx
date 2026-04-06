@@ -20,6 +20,13 @@ export default function Login() {
 
     try {
       await login(email, password);
+      // Clear clipboard for security
+      try {
+        await navigator.clipboard.writeText('');
+      } catch (err) {
+        console.error('Failed to clear clipboard:', err);
+      }
+      setPassword('');
       navigate('/');
     } catch (err) {
       if (!err.response) {

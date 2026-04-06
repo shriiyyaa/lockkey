@@ -21,6 +21,13 @@ export default function Signup() {
 
     try {
       await signup(name, email, password);
+      // Clear clipboard for security
+      try {
+        await navigator.clipboard.writeText('');
+      } catch (err) {
+        console.error('Failed to clear clipboard:', err);
+      }
+      setPassword('');
       navigate('/');
     } catch (err) {
       if (!err.response) {

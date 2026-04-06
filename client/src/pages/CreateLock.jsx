@@ -61,6 +61,15 @@ export default function CreateLock() {
         durationMinutes,
         futureMessage: futureMessage.trim()
       });
+
+      // Clear clipboard for security
+      try {
+        await navigator.clipboard.writeText('');
+      } catch (err) {
+        console.error('Failed to clear clipboard:', err);
+      }
+
+      setPassword(''); // Clear memory
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create lock');
