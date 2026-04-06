@@ -194,11 +194,17 @@ router.post('/:id/request-unlock', async (req, res) => {
     await lock.save();
 
     res.json({
-      message: 'Unlock request started. Please wait for the delay period.',
+      id: lock.id,
+      platform: lock.platform,
+      lockStart: lock.lockStart,
+      lockEnd: lock.lockEnd,
       futureMessage: lock.futureMessage,
+      status: lock.status,
       earlyUnlockRequestedAt: lock.earlyUnlockRequestedAt,
       earlyUnlockDelay: lock.earlyUnlockDelay,
-      unlockAvailableAt: new Date(lock.earlyUnlockRequestedAt.getTime() + lock.earlyUnlockDelay * 60 * 1000)
+      challengeCompleted: lock.challengeCompleted,
+      isBypassFailed: lock.isBypassFailed,
+      createdAt: lock.createdAt
     });
   } catch (err) {
     console.error('Request unlock error:', err);

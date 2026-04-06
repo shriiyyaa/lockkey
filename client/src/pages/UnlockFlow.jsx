@@ -38,8 +38,8 @@ export default function UnlockFlow() {
     setError('');
     try {
       const res = await api.post(`/locks/${id}/request-unlock`, { delayMinutes: 15 });
-      // Reload lock state
-      await fetchLock();
+      // Update state directly from response for instant UI update
+      setLock(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to request unlock');
     } finally {
@@ -317,10 +317,10 @@ export default function UnlockFlow() {
               <button
                 onClick={handleRequestUnlock}
                 disabled={loading}
-                className="btn-danger w-full sm:w-auto px-10 border"
+                className={`btn-danger w-full sm:w-auto px-10 border ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
                 id="btn-request-unlock"
               >
-                Trigger Early Unlock Sequence
+                {loading ? '[ PROCESSING_SEQUENCE... ]' : 'Trigger Early Unlock Sequence'}
               </button>
 
               <div className="mt-8">
