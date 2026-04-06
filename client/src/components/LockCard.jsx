@@ -126,9 +126,9 @@ export default function LockCard({ lock, index, onDelete }) {
         {lock.status === 'completed' && (
           <button 
              onClick={handlePurge}
-             className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors py-1"
+             className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors py-1 flex items-center justify-center gap-1"
           >
-            PURGE_DATA [X]
+            🗑️ PURGE_DATA
           </button>
         )}
       </div>

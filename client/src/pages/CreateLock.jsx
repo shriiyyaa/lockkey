@@ -163,6 +163,7 @@ export default function CreateLock() {
                 className="input-field pr-16 text-lg"
                 placeholder="Paste the target password here"
                 required
+                autoComplete="new-password"
               />
               <button
                 type="button"

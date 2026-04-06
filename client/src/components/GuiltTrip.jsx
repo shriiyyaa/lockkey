@@ -220,9 +220,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
                 </button>
               </div>
             </motion.div>
-          ) : null}
-
-          {step === 2 && (
+          ) : !isLockedOut && step === 2 ? (
             <motion.div 
               key="step2"
               initial={{ opacity: 0, x: 20 }}
@@ -256,9 +254,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
                 </button>
               </div>
             </motion.div>
-          )}
-
-          {step === 3 && (
+          ) : !isLockedOut && step === 3 ? (
             <motion.div 
               key="step3"
               initial={{ opacity: 0, x: 20 }}
@@ -274,9 +270,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
                 onLose={handleLoss} 
               />
             </motion.div>
-          )}
-
-          {step === 4 && (
+          ) : !isLockedOut && step === 4 ? (
             <motion.div 
               key="step4"
               initial={{ opacity: 0, x: 20 }}
@@ -287,9 +281,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               <h2 className="sub-heading text-mono-950 mb-2">DIGITS_CONVERGENCE (3/5)</h2>
               <DigitsGame onWin={() => setStep(5)} onLose={handleLoss} />
             </motion.div>
-          )}
-
-          {step === 5 && (
+          ) : !isLockedOut && step === 5 ? (
             <motion.div 
               key="step5"
               initial={{ opacity: 0, x: 20 }}
@@ -300,9 +292,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               <h2 className="sub-heading text-mono-950 mb-2">LOGIC_LINKS (4/5)</h2>
               <ConnectionsGame onWin={() => setStep(6)} onLose={handleLoss} />
             </motion.div>
-          )}
-
-          {step === 6 && (
+          ) : !isLockedOut && step === 6 ? (
             <motion.div 
               key="step6"
               initial={{ opacity: 0, x: 20 }}
@@ -313,9 +303,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (5/5)</h2>
               <StroopTest onComplete={() => setStep(7)} onLose={handleLoss} />
             </motion.div>
-          )}
-
-          {step === 7 && (
+          ) : !isLockedOut && step === 7 ? (
             <motion.div 
               key="step7"
               initial={{ opacity: 0, x: 20 }}
@@ -370,7 +358,7 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
                 </div>
               )}
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </motion.div>
     </div>
