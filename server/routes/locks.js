@@ -71,7 +71,8 @@ router.get('/', async (req, res) => {
     for (const lock of locks) {
       if (lock.status === 'active' && new Date(lock.lockEnd) <= now) {
         lock.status = 'completed';
-        await Lock.update({ status: 'completed' }, { where: { id: lock.id } });
+        lock.challengeCompleted = true;
+        await Lock.update({ status: 'completed', challengeCompleted: true }, { where: { id: lock.id } });
       }
       updatedLocks.push({
         id: lock.id,
@@ -147,7 +148,8 @@ router.get('/:id', async (req, res) => {
     const now = new Date();
     if (lock.status === 'active' && new Date(lock.lockEnd) <= now) {
       lock.status = 'completed';
-      await Lock.update({ status: 'completed' }, { where: { id: lock.id } });
+      lock.challengeCompleted = true;
+      await Lock.update({ status: 'completed', challengeCompleted: true }, { where: { id: lock.id } });
     }
 
     res.json({
