@@ -28,8 +28,8 @@ export default function DigitsGame({ onWin, onLose }) {
       else if (op === '*') current *= nums[i];
     }
 
-    // Extreme targets: 300 to 1500
-    if (current < 300 || current > 1500) {
+    // 70% Difficulty targets: 100 to 750
+    if (current < 100 || current > 750) {
       generatePuzzle(); 
       return;
     }

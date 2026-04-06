@@ -176,7 +176,7 @@ const WORDS = [
   'QUOTE', 'QUOTH', 'SYLPH'
 ];
 const WORD_LENGTH = 5;
-const MAX_GUESSES = 5;
+const MAX_GUESSES = 6;
 
 export default function WordleGame({ onWin, onLose }) {
   const [targetWord, setTargetWord] = useState('');

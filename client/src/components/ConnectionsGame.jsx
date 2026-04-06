@@ -4,27 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 const CATEGORIES = [
   { theme: 'PALINDROMES', words: ['RADAR', 'KAYAK', 'CIVIC', 'LEVEL'] },
   { theme: 'GREEK LETTERS', words: ['DELTA', 'SIGMA', 'PI', 'OMEGA'] },
-  { theme: 'US STATES (HOMOPHONES)', words: ['ALASKA', 'MAIN', 'OREGON', 'NEW'] },
   { theme: 'SILENT LETTERS', words: ['KNEAD', 'GNASH', 'WRATH', 'PITHY'] },
   { theme: 'PERIODIC TABLE', words: ['IRON', 'LEAD', 'GOLD', 'TIN'] },
-  { theme: 'PLANETARY SYMBOLS', words: ['MARS', 'VENUS', 'CROSS', 'CRESCENT'] },
   { theme: 'HOMOPHONES OF NUMBERS', words: ['WON', 'TOO', 'FOR', 'ATE'] },
   { theme: 'CHESS PIECES', words: ['QUEEN', 'KING', 'ROOK', 'KNIGHT'] },
-  { theme: 'PHONETIC ALPHABET', words: ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'] },
   { theme: 'WORDS WITH SYMBOLS', words: ['DOLLAR', 'HASH', 'STAR', 'AT'] },
-  { theme: 'NOBEL PRIZE CATS', words: ['PEACE', 'PHYSICS', 'ECON', 'MED'] },
-  { theme: 'COMPUTER PORTS', words: ['USB', 'HDMI', 'SATA', 'VGA'] },
-  { theme: 'TERMS IN GENETICS', words: ['ALLELE', 'LOCUS', 'TRAIT', 'GENE'] },
-  { theme: 'TYPES OF QUARKS', words: ['UP', 'DOWN', 'TOP', 'BOTTOM'] },
-  { theme: 'GEOLOGICAL EPOCHS', words: ['EOCENE', 'MIOCENE', 'PLIOCENE', 'HOLOCENE'] },
-  { theme: 'CHESS ENGINE NAMES', words: ['STOCKFISH', 'LEELA', 'KOMODO', 'HOUDINI'] },
   { theme: 'ANCIENT CITIES', words: ['UR', 'BABYLON', 'THEBES', 'CARTHAGE'] },
   { theme: 'TYPES OF CLOUDS', words: ['CIRRUS', 'STRATUS', 'CUMULUS', 'NIMBUS'] },
-  { theme: 'SUBATOMIC PARTICLES', words: ['MUON', 'TAU', 'NEUTRINO', 'PHOTON'] },
-  { theme: 'FAMOUS CRYPTOGRAPHERS', words: ['SHANNON', 'TURING', 'RIVEST', 'ADLEMAN'] },
-  { theme: 'ARCHAIC UNITS', words: ['CUBIT', 'FATHOM', 'LEAGUE', 'FURLONG'] },
-  { theme: 'TYPES OF TEA', words: ['OOLONG', 'PUERH', 'MATCHA', 'SENCHA'] },
-  { theme: 'MUSICAL TEMPO', words: ['ADAGIO', 'PRESTO', 'LARGO', 'ANDANTE'] },
   { theme: 'TYPES OF PASTA', words: ['FUSILLI', 'PENNE', 'FARFALLE', 'RIGATONI'] }
 ];
 

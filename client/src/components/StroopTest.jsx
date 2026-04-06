@@ -13,10 +13,11 @@ export default function StroopTest({ onComplete, onLose }) {
   const [score, setScore] = useState(0);
   const [target, setTarget] = useState({ text: '', color: '' });
   const [status, setStatus] = useState('idle'); // idle, correct, wrong
-  const [timeLeft, setTimeLeft] = useState(1.2);
+  const [timeLeft, setTimeLeft] = useState(1.5);
+  const totalTime = 1.5;
 
   const generateRound = () => {
-    setTimeLeft(1.2);
+    setTimeLeft(totalTime);
     const textColorIndex = Math.floor(Math.random() * COLORS.length);
     let fontColorIndex = Math.floor(Math.random() * COLORS.length);
     
@@ -37,7 +38,7 @@ export default function StroopTest({ onComplete, onLose }) {
   }, []);
 
   useEffect(() => {
-    if (status !== 'idle' || score >= 10 || !target.text) return;
+    if (status !== 'idle' || score >= 7 || !target.text) return;
     
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -60,7 +61,7 @@ export default function StroopTest({ onComplete, onLose }) {
       const newScore = score + 1;
       setScore(newScore);
       setStatus('correct');
-      if (newScore >= 10) {
+      if (newScore >= 7) {
         setTimeout(onComplete, 1000);
       } else {
         setTimeout(() => {
@@ -92,7 +93,7 @@ export default function StroopTest({ onComplete, onLose }) {
 
       {/* Progress indicators */}
       <div className="flex gap-1.5 flex-wrap justify-center">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
           <div
             key={i}
             className={`w-2.5 h-2.5 border-2 border-mono-950 transition-colors ${
@@ -106,7 +107,7 @@ export default function StroopTest({ onComplete, onLose }) {
       <div className="w-full max-w-[200px] h-1 bg-mono-100 border border-mono-950 overflow-hidden">
         <motion.div 
           className="h-full bg-red-600"
-          animate={{ width: `${(timeLeft / 1.2) * 100}%` }}
+          animate={{ width: `${(timeLeft / totalTime) * 100}%` }}
           transition={{ duration: 0.1, ease: "linear" }}
         />
       </div>
@@ -159,7 +160,7 @@ export default function StroopTest({ onComplete, onLose }) {
               exit={{ opacity: 0 }}
               className="text-green-600 text-[10px] font-black uppercase tracking-widest"
             >
-              ACCURATE_STREAK: {score}/10
+              ACCURATE_STREAK: {score}/7
             </motion.p>
           )}
         </AnimatePresence>

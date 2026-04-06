@@ -105,13 +105,19 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
     }
 
     if (currentPlayer === 'O') {
-      // AI's turn! Wait slightly for fairness UX
       const timer = setTimeout(() => {
-        // PERFECT AI: No more error rate. 0.00% chance of random moves.
         let move = -1;
         
-        // Use perfect Minimax exclusively for absolute difficulty
-        let bestScore = -Infinity;
+        // 30% "Human Error" Factor for 70% Difficulty
+        const shouldMakeError = Math.random() < 0.3;
+        const availableMoves = [];
+        ticTacToeState.forEach((val, i) => { if (val === null) availableMoves.push(i); });
+
+        if (shouldMakeError && availableMoves.length > 0) {
+          move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        } else {
+          // Use perfect Minimax if no error is made
+          let bestScore = -Infinity;
           for (let i = 0; i < 9; i++) {
             if (ticTacToeState[i] === null) {
               let board = [...ticTacToeState];
@@ -124,13 +130,15 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               }
             }
           }
+        }
+
         if (move !== -1) {
           const newState = [...ticTacToeState];
           newState[move] = 'O';
           setTicTacToeState(newState);
           setCurrentPlayer('X');
         }
-      }, 600); // 600ms AI thought process
+      }, 600); 
       
       return () => clearTimeout(timer);
     }
