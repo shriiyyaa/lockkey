@@ -82,8 +82,16 @@ export default function LockCard({ lock, index, onDelete }) {
               {lock.status}
             </span>
           </div>
-          <div className="text-[10px] font-black text-mono-300 uppercase tracking-widest pt-1">
-            {isActive ? 'LOCKED' : 'CLEARED'}
+          
+          <div className="flex flex-col items-end pt-1">
+            <div className="text-[10px] font-black text-mono-300 uppercase tracking-widest">
+              {isActive ? 'LOCKED' : 'CLEARED'}
+            </div>
+            {lock.isBypassFailed && isActive && (
+              <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.2em] mt-1 bg-red-100/50 px-1 border border-red-200">
+                LOCKED_OUT
+              </span>
+            )}
           </div>
         </div>
 
