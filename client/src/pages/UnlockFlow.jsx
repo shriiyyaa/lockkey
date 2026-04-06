@@ -156,14 +156,30 @@ export default function UnlockFlow() {
               </code>
             </div>
 
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(decryptedPassword);
-              }}
-              className="btn-primary"
-            >
-              COPY TO CLIPBOARD
-            </button>
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(decryptedPassword);
+                }}
+                className="btn-primary w-full"
+              >
+                COPY TO CLIPBOARD
+              </button>
+
+              <div className="mt-8 pt-8 border-t-2 border-dashed border-mono-200">
+                <p className="text-[10px] font-black text-mono-500 mb-4 uppercase tracking-[0.2em]">
+                  DID YOU SUCCESSFULLY RETRIEVE THE KEY?
+                </p>
+                <div className="flex gap-4">
+                  <button onClick={handleDelete} className="btn-danger flex-1">
+                    YES, PURGE THIS LOCK
+                  </button>
+                  <button onClick={() => navigate('/')} className="btn-secondary flex-1 opacity-70">
+                    NOT YET, KEEP IT
+                  </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
 

@@ -46,9 +46,12 @@ export function AuthProvider({ children }) {
     const cleanEmail = email.trim();
     const cleanPassword = password.trim();
     const res = await api.post('/auth/login', { email: cleanEmail, password: cleanPassword });
+    
+    // Set immediate state for perceived speed
+    setUser(res.data.user);
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
+    
     return res.data;
   };
 
@@ -57,9 +60,12 @@ export function AuthProvider({ children }) {
     const cleanEmail = email.trim();
     const cleanPassword = password.trim();
     const res = await api.post('/auth/signup', { name: cleanName, email: cleanEmail, password: cleanPassword });
+    
+    // Set immediate state for perceived speed
+    setUser(res.data.user);
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
+    
     return res.data;
   };
 

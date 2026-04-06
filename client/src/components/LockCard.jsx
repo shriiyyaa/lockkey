@@ -93,7 +93,7 @@ export default function LockCard({ lock, index }) {
         )}
       </div>
 
-      <div className="p-4 bg-mono-100 border-t-2 border-mono-950 mt-auto">
+      <div className="p-4 bg-mono-100 border-t-2 border-mono-950 mt-auto flex flex-col gap-2">
         <Link 
           to={`/unlock/${lock.id}`}
           className={`block w-full text-center py-2 rounded-none text-[10px] font-black uppercase tracking-widest border-2 transition-all duration-200 ${
@@ -104,6 +104,24 @@ export default function LockCard({ lock, index }) {
         >
           {lock.status === 'completed' ? 'DECIPHER PASSWORD' : 'MANAGE ENCRYPTION'}
         </Link>
+        
+        {lock.status === 'completed' && (
+          <button 
+             onClick={async () => {
+               if (window.confirm('PERMANENTLY PURGE THIS RECORD?')) {
+                 try {
+                   await api.delete(`/locks/${lock.id}`);
+                   window.location.reload();
+                 } catch (e) {
+                   console.error('Delete failed', e);
+                 }
+               }
+             }}
+             className="text-[8px] font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors py-1"
+          >
+            PURGE_DATA [X]
+          </button>
+        )}
       </div>
     </motion.div>
   );
