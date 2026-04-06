@@ -11,6 +11,8 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
+  const [isWarmingUp, setIsWarmingUp] = useState(false);
+  
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -18,9 +20,15 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setIsWarmingUp(false);
+
+    // Detected cold-start timer
+    const timer = setTimeout(() => setIsWarmingUp(true), 2500);
 
     try {
       await signup(name, email, password);
+      clearTimeout(timer);
+      
       // Clear clipboard for security
       try {
         await navigator.clipboard.writeText('');
@@ -30,6 +38,8 @@ export default function Signup() {
       setPassword('');
       navigate('/');
     } catch (err) {
+      clearTimeout(timer);
+      setIsWarmingUp(false);
       if (!err.response) {
         if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
           setError('PROTOCOL_WARMUP: SYSTEM INITIALIZING. PLEASE WAIT 30s AND RETRY.');
@@ -143,9 +153,20 @@ export default function Signup() {
                 type="submit"
                 disabled={loading}
                 id="btn-signup"
-                className="btn-primary w-full"
+                className={`btn-primary w-full flex items-center justify-center gap-3 ${loading ? 'cursor-not-allowed opacity-80' : ''}`}
               >
-                {loading ? 'REGISTERING...' : 'INITIALIZE ACCOUNT'}
+                {loading ? (
+                  <>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce"></span>
+                    <span className="ml-2">
+                      {isWarmingUp ? 'INITIALIZING_CORE...' : 'REGISTERING...'}
+                    </span>
+                  </>
+                ) : (
+                  'INITIALIZE ACCOUNT'
+                )}
               </button>
             </div>
           </form>

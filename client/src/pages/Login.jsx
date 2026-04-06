@@ -8,7 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isWarmingUp, setIsWarmingUp] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,9 +17,15 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setIsWarmingUp(false);
+
+    // Detected cold-start timer
+    const timer = setTimeout(() => setIsWarmingUp(true), 2500);
 
     try {
       await login(email, password);
+      clearTimeout(timer);
+      
       // Clear clipboard for security
       try {
         await navigator.clipboard.writeText('');
@@ -29,6 +35,8 @@ export default function Login() {
       setPassword('');
       navigate('/');
     } catch (err) {
+      clearTimeout(timer);
+      setIsWarmingUp(false);
       if (!err.response) {
         if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
           setError('PROTOCOL_WARMUP: SYSTEM INITIALIZING. PLEASE WAIT 30s AND RETRY.');
@@ -126,9 +134,20 @@ export default function Login() {
                 type="submit"
                 disabled={loading}
                 id="btn-login"
-                className="btn-primary w-full"
+                className={`btn-primary w-full flex items-center justify-center gap-3 ${loading ? 'cursor-not-allowed opacity-80' : ''}`}
               >
-                {loading ? 'AUTHENTICATING...' : 'INITIATE LOGIN'}
+                {loading ? (
+                  <>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 bg-ivory rounded-full animate-bounce"></span>
+                    <span className="ml-2">
+                      {isWarmingUp ? 'WARMING_UP_SYSTEM...' : 'AUTHENTICATING...'}
+                    </span>
+                  </>
+                ) : (
+                  'INITIATE LOGIN'
+                )}
               </button>
             </div>
           </form>
