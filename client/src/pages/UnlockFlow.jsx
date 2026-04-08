@@ -93,11 +93,24 @@ export default function UnlockFlow() {
     ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
     : null;
     
-  useEffect(() => {
-    if (isUnlocking && unlockAvailableAt && new Date() >= unlockAvailableAt && !lock?.challengeCompleted && !showChallenge) {
-      setShowChallenge(true);
+  const handleAutoBypass = async () => {
+    try {
+      setLoading(true);
+      await api.post(`/locks/${lock.id}/bypass-success`);
+      await fetchLock();
+      handleRevealPassword();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Automatic bypass failed');
+    } finally {
+      setLoading(false);
     }
-  }, [isUnlocking, unlockAvailableAt, lock?.challengeCompleted, showChallenge]);
+  };
+
+  useEffect(() => {
+    if (isUnlocking && unlockAvailableAt && new Date() >= unlockAvailableAt && !lock?.challengeCompleted) {
+      handleAutoBypass();
+    }
+  }, [isUnlocking, unlockAvailableAt, lock?.challengeCompleted]);
 
   if (loading && !lock) {
     return (
@@ -206,27 +219,7 @@ export default function UnlockFlow() {
           </motion.div>
         )}
 
-        {/* State 3: Gauntlet Time (Early Unlock) */}
-        {!decryptedPassword && !isCompleted && showChallenge && (
-          <GuiltTrip 
-             lockId={lock.id}
-             isEmergency={false}
-             onCancel={() => setShowChallenge(false)}
-             onComplete={async () => {
-               try {
-                 setLoading(true);
-                 await api.post(`/locks/${lock.id}/bypass-success`);
-                 setShowChallenge(false);
-                 await fetchLock();
-                 handleRevealPassword();
-               } catch (err) {
-                 setError(err.response?.data?.message || 'Bypass validation failed');
-               } finally {
-                 setLoading(false);
-               }
-             }}
-          />
-        )}
+
 
         {/* State 4: Unlocking (Delay) */}
         {!decryptedPassword && !isCompleted && isUnlocking && !showChallenge && unlockAvailableAt && (
@@ -242,7 +235,7 @@ export default function UnlockFlow() {
             <div className="mb-10 p-6 bg-mono-100 border-2 border-mono-950 shadow-[4px_4px_0_0_#3f3f46]">
               <CountdownTimer 
                 targetDate={unlockAvailableAt} 
-                onComplete={() => setShowChallenge(true)}
+                onComplete={handleAutoBypass}
               />
             </div>
 
