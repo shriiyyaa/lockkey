@@ -5,8 +5,8 @@ import StroopTest from './StroopTest';
 import DigitsGame from './DigitsGame';
 import ConnectionsGame from './ConnectionsGame';
 
-export default function GuiltTrip({ lockId, onComplete, onCancel }) {
-  const [step, setStep] = useState(1); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Digits, 5: Connections, 6: Stroop, 7: Rationalize
+export default function GuiltTrip({ lockId, onComplete, onCancel, isEmergency = true }) {
+  const [step, setStep] = useState(isEmergency ? 1 : 2); // 1: Reflect, 2: TicTacToe, 3: Wordle, 4: Digits, 5: Connections, 6: Stroop, 7: Rationalize
   
   // TicTacToe State
   const [ticTacToeState, setTicTacToeState] = useState(Array(9).fill(null));
@@ -309,7 +309,10 @@ export default function GuiltTrip({ lockId, onComplete, onCancel }) {
               className="text-center"
             >
               <h2 className="sub-heading text-mono-950 mb-2">COGNITIVE_CONFLICT (5/5)</h2>
-              <StroopTest onComplete={() => setStep(7)} onLose={handleLoss} />
+              <StroopTest onComplete={() => {
+                if (isEmergency) setStep(7);
+                else onComplete();
+              }} onLose={handleLoss} />
             </motion.div>
           ) : !isLockedOut && step === 7 ? (
             <motion.div 

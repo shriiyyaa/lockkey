@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
-import CognitiveChallenge from '../components/CognitiveChallenge';
 import CountdownTimer from '../components/CountdownTimer';
 import GuiltTrip from '../components/GuiltTrip';
 
@@ -207,33 +206,26 @@ export default function UnlockFlow() {
           </motion.div>
         )}
 
-        {/* State 3: Challenge Time */}
+        {/* State 3: Gauntlet Time (Early Unlock) */}
         {!decryptedPassword && !isCompleted && showChallenge && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <CognitiveChallenge 
-              lockId={lock.id} 
-              onComplete={async (challengeType, answer, extra) => {
-                try {
-                  setLoading(true);
-                  const payload = { challengeType, answer };
-                  if (challengeType === 'typing') payload.targetSentence = extra;
-                  if (challengeType === 'math') payload.correctAnswer = extra;
-                  
-                  await api.post(`/locks/${lock.id}/complete-challenge`, payload);
-                  setShowChallenge(false);
-                  await fetchLock();
-                  handleRevealPassword();
-                } catch (err) {
-                  setError(err.response?.data?.message || 'Challenge validation failed');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            />
-          </motion.div>
+          <GuiltTrip 
+             lockId={lock.id}
+             isEmergency={false}
+             onCancel={() => setShowChallenge(false)}
+             onComplete={async () => {
+               try {
+                 setLoading(true);
+                 await api.post(`/locks/${lock.id}/bypass-success`);
+                 setShowChallenge(false);
+                 await fetchLock();
+                 handleRevealPassword();
+               } catch (err) {
+                 setError(err.response?.data?.message || 'Bypass validation failed');
+               } finally {
+                 setLoading(false);
+               }
+             }}
+          />
         )}
 
         {/* State 4: Unlocking (Delay) */}

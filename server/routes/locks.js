@@ -305,7 +305,28 @@ router.post('/:id/reveal', async (req, res) => {
   }
 });
 
-// POST /api/locks/:id/fuck-it — Emergency bypass
+// POST /api/locks/:id/bypass-success — Unified endpoint for gauntlet completion
+router.post('/:id/bypass-success', async (req, res) => {
+  try {
+    const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });
+
+    if (!lock) {
+      return res.status(404).json({ message: 'Lock not found' });
+    }
+
+    // Immediate completion upon winning the gauntlet
+    lock.status = 'completed';
+    lock.challengeCompleted = true;
+    await lock.save();
+
+    res.json({ message: 'Bypass protocol validated. Access granted.' });
+  } catch (err) {
+    console.error('Bypass success error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/locks/:id/fuck-it — Emergency bypass (alias for bypass-success but traditionally kept for specific rationale logic later)
 router.post('/:id/fuck-it', async (req, res) => {
   try {
     const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });

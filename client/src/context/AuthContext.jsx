@@ -8,6 +8,9 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // PRE-WARM PROTOCOL: Wake up the server as soon as the app loads to mitigate cold starts
+    fetch('https://lockkey-h8ib.onrender.com/api/locks/stats', { mode: 'no-cors' }).catch(() => {});
+
     const token = localStorage.getItem('lockkey_token');
     const savedUser = localStorage.getItem('lockkey_user');
 
