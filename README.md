@@ -10,7 +10,7 @@ A high-contrast, retro-themed focus system designed to protect your attention. *
 
 ## Features
 - **🧱 Ivory-Block Locks**: Secure your platform credentials behind geometric time-constraints.
-- **⏳ Delay Protocol**: Early access is gated by a 15-minute cooldown and a cognitive challenge.
+- **⏳ Delay Protocol**: Early access is gated byy a 15-minute cooldown and a cognitive challenge.
 - **🎭 The Guilt Trip**: Emergency bypasses (Fuck It Mode) trigger a multi-phase mirrored reflection, an unwinnable Tic-Tac-Toe struggle, and a mandatory rationalization step.
 - **🧠 Cognitive Logic**: Unlocking requires a calculated math or typing challenge to prove deliberate intent.
 - **🔒 AES-256-GCM**: Industry-standard encryption for all stored credentials.
