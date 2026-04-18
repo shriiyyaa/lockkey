@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 import CountdownTimer from '../components/CountdownTimer';
 import GuiltTrip from '../components/GuiltTrip';
+import SecurePasswordDisplay from '../components/SecurePasswordDisplay';
 
 // --- Final Resistance Protocol ---
 // Shown after the 15-minute early unlock timer expires.
@@ -264,34 +265,19 @@ export default function UnlockFlow() {
               TRANSFER KEY SECURELY. DO NOT SCREENSHOT.
             </p>
 
-            <div className="bg-mono-100 border-2 border-mono-950 p-6 mb-8 relative">
-              <code className="text-base sm:text-lg font-mono text-mono-950 font-black select-all break-all tracking-normal">
-                {decryptedPassword}
-              </code>
-            </div>
+            <SecurePasswordDisplay password={decryptedPassword} />
 
-            <div className="flex flex-col gap-4">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(decryptedPassword);
-                }}
-                className="btn-primary w-full"
-              >
-                COPY TO CLIPBOARD
-              </button>
-
-              <div className="mt-8 pt-8 border-t-2 border-dashed border-mono-200">
-                <p className="text-[10px] font-black text-mono-500 mb-4 uppercase tracking-[0.2em]">
-                  DID YOU SUCCESSFULLY RETRIEVE THE KEY?
-                </p>
-                <div className="flex gap-4">
-                  <button onClick={handleDelete} className="btn-danger flex-1">
-                    YES, PURGE THIS LOCK
-                  </button>
-                  <button onClick={() => navigate('/')} className="btn-secondary flex-1 opacity-70">
-                    NOT YET, KEEP IT
-                  </button>
-                </div>
+            <div className="mt-8 pt-8 border-t-2 border-dashed border-mono-200">
+              <p className="text-[10px] font-black text-mono-500 mb-4 uppercase tracking-[0.2em]">
+                DID YOU SUCCESSFULLY RETRIEVE THE KEY?
+              </p>
+              <div className="flex gap-4">
+                <button onClick={handleDelete} className="btn-danger flex-1">
+                  YES, PURGE THIS LOCK
+                </button>
+                <button onClick={() => navigate('/')} className="btn-secondary flex-1 opacity-70">
+                  NOT YET, KEEP IT
+                </button>
               </div>
             </div>
           </motion.div>

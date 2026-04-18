@@ -295,9 +295,12 @@ router.post('/:id/reveal', async (req, res) => {
       return res.status(400).json({ message: 'Please complete the challenge first' });
     }
 
-    // Decrypt and return
+    // Decrypt and return — ensure no caching at any layer
     const password = decrypt(lock.encryptedPassword, lock.iv, lock.authTag);
 
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.json({ password });
   } catch (err) {
     console.error('Reveal password error:', err);
