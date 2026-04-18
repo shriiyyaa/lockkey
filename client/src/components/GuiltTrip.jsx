@@ -255,12 +255,6 @@ export default function GuiltTrip({ lockId, onComplete, onCancel, isEmergency = 
               <p className={`text-[10px] font-black uppercase tracking-widest mb-6 ${
                 checkWinner(ticTacToeState) === 'X' ? 'text-green-600 animate-pulse' : 'text-red-600'
               }`}>{gameMessage}</p>
-              
-              <div className="flex gap-4">
-                <button onClick={resetTicTacToe} className="btn-secondary flex-1 py-2 text-[10px]">
-                  RESTART ALGORITHM
-                </button>
-              </div>
             </motion.div>
           ) : !isLockedOut && step === 3 ? (
             <motion.div 

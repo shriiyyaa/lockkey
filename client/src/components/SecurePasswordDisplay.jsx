@@ -93,6 +93,10 @@ export default function SecurePasswordDisplay({ password }) {
     try {
       await navigator.clipboard.writeText(password);
       setCopied(true);
+      // Auto-clear clipboard after 30s — prevents persistent exposure on shared devices
+      setTimeout(async () => {
+        try { await navigator.clipboard.writeText(''); } catch {}
+      }, 30000);
       setTimeout(() => setCopied(false), 2500);
     } catch {
       // Fallback for older browsers

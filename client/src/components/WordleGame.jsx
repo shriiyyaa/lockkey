@@ -177,15 +177,18 @@ const WORDS = [
 ];
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
+// Filter the word list to strictly 5-letter words — prevents unwinnable game states
+const VALID_WORDS = WORDS.filter(w => w.length === WORD_LENGTH);
 
 export default function WordleGame({ onWin, onLose }) {
   const [targetWord, setTargetWord] = useState('');
   const [guesses, setGuesses] = useState([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameOver, setGameOver] = useState(false);
+  const [invalidWord, setInvalidWord] = useState(false); // shake state
 
   useEffect(() => {
-    setTargetWord(WORDS[Math.floor(Math.random() * WORDS.length)]);
+    setTargetWord(VALID_WORDS[Math.floor(Math.random() * VALID_WORDS.length)]);
   }, []);
 
   const handleKeyDown = useCallback(
@@ -194,6 +197,13 @@ export default function WordleGame({ onWin, onLose }) {
 
       if (e.key === 'Enter') {
         if (currentGuess.length !== WORD_LENGTH) return;
+        
+        // Validate guess is a real word
+        if (!VALID_WORDS.includes(currentGuess)) {
+          setInvalidWord(true);
+          setTimeout(() => setInvalidWord(false), 600);
+          return;
+        }
         
         const newGuesses = [...guesses, currentGuess];
         setGuesses(newGuesses);
@@ -208,7 +218,7 @@ export default function WordleGame({ onWin, onLose }) {
             setGuesses([]);
             setCurrentGuess('');
             setGameOver(false);
-            setTargetWord(WORDS[Math.floor(Math.random() * WORDS.length)]);
+            setTargetWord(VALID_WORDS[Math.floor(Math.random() * VALID_WORDS.length)]);
             if (onLose) onLose();
           }, 2500);
         }
@@ -289,19 +299,26 @@ export default function WordleGame({ onWin, onLose }) {
         </div>
       );
     } else if (i === guesses.length) {
-      // Current active row
+      // Current active row — shake if invalid word submitted
       const emptyCells = Array(WORD_LENGTH - currentGuess.length).fill('');
       rows.push(
-        <div key={i} className="flex gap-2 justify-center mb-2">
+        <motion.div
+          key={i}
+          animate={invalidWord ? { x: [-6, 6, -5, 5, -3, 3, 0] } : { x: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex gap-2 justify-center mb-2"
+        >
           {currentGuess.split('').map((char, j) => (
-            <div key={j} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center font-black text-lg sm:text-xl border-2 border-mono-950 bg-mono-100 text-mono-950 uppercase shadow-[2px_2px_0_0_#3f3f46]">
+            <div key={j} className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center font-black text-lg sm:text-xl border-2 uppercase shadow-[2px_2px_0_0_#3f3f46] ${
+              invalidWord ? 'border-red-500 bg-red-50 text-red-600' : 'border-mono-950 bg-mono-100 text-mono-950'
+            }`}>
               {char}
             </div>
           ))}
           {emptyCells.map((_, j) => (
             <div key={`empty-${j}`} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center border-2 border-mono-300 bg-transparent"></div>
           ))}
-        </div>
+        </motion.div>
       );
     } else {
       // Empty future rows

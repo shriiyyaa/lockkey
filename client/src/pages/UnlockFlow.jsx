@@ -10,6 +10,8 @@ import SecurePasswordDisplay from '../components/SecurePasswordDisplay';
 // Shown after the 15-minute early unlock timer expires.
 // Forces a 60-second reflection period before the user can proceed.
 function FinalResistanceProtocol({ lock, onProceed, onRetreat, isLoading }) {
+  // Store the target once — prevents re-render from resetting the timer
+  const [reflectionTarget] = useState(() => new Date(Date.now() + 60000));
   const [reflectionDone, setReflectionDone] = useState(false);
 
   return (
@@ -51,8 +53,8 @@ function FinalResistanceProtocol({ lock, onProceed, onRetreat, isLoading }) {
             REFLECT FOR 60 SECONDS. YOUR CHOICE REVEALS WHO YOU ARE.
           </p>
           <div className="max-w-[200px] mx-auto">
-            <CountdownTimer
-              targetDate={new Date(Date.now() + 60000)}
+          <CountdownTimer
+              targetDate={reflectionTarget}
               onComplete={() => setReflectionDone(true)}
             />
           </div>
@@ -99,6 +101,7 @@ export default function UnlockFlow() {
   const [showGuilt, setShowGuilt] = useState(false);
   const [showFinalResistance, setShowFinalResistance] = useState(false);
   const [decryptedPassword, setDecryptedPassword] = useState('');
+  const [waitExpired, setWaitExpired] = useState(false);
 
   const fetchLock = useCallback(async () => {
     try {
@@ -112,9 +115,32 @@ export default function UnlockFlow() {
     }
   }, [id]);
 
+  // Derived lock state — declared before useEffects that depend on them
+  const isCompleted = lock?.status === 'completed';
+  const isUnlocking = lock?.status === 'unlocking';
+  const unlockAvailableAt = lock?.earlyUnlockRequestedAt
+    ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
+    : null;
+
   useEffect(() => {
     fetchLock();
   }, [fetchLock]);
+
+  // Reactively track when the 15-min wait expires (fixes stale waitExpired variable)
+  useEffect(() => {
+    if (!isUnlocking || !unlockAvailableAt) {
+      setWaitExpired(false);
+      return;
+    }
+    const now = new Date();
+    if (now >= unlockAvailableAt) {
+      setWaitExpired(true);
+      return;
+    }
+    const diff = unlockAvailableAt - now;
+    const timer = setTimeout(() => setWaitExpired(true), diff);
+    return () => clearTimeout(timer);
+  }, [isUnlocking, unlockAvailableAt]);
 
   // Reveal password — fully sequential, properly awaited
   const handleRevealPassword = async () => {
@@ -190,6 +216,7 @@ export default function UnlockFlow() {
 
   const handleDelete = async () => {
     try {
+      setDecryptedPassword(''); // Clear from memory before navigating
       await api.delete(`/locks/${id}`);
       navigate('/');
     } catch (err) {
@@ -197,12 +224,6 @@ export default function UnlockFlow() {
     }
   };
 
-  const isCompleted = lock?.status === 'completed';
-  const isUnlocking = lock?.status === 'unlocking';
-  const unlockAvailableAt = lock?.earlyUnlockRequestedAt
-    ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
-    : null;
-  const waitExpired = unlockAvailableAt && new Date() >= unlockAvailableAt;
 
   if (loading && !lock) {
     return (
@@ -301,7 +322,7 @@ export default function UnlockFlow() {
               <button onClick={handleRevealPassword} disabled={loading} className="btn-primary">
                 {loading ? '[ DECRYPTING... ]' : 'REVEAL ACCESS KEY'}
               </button>
-              <button onClick={handleDelete} className="btn-danger">
+              <button onClick={handleDelete} disabled={loading} className="btn-danger">
                 PURGE LOCK
               </button>
             </div>
@@ -452,7 +473,10 @@ export default function UnlockFlow() {
         <GuiltTrip
           lockId={lock.id}
           onComplete={handleGuiltComplete}
-          onCancel={() => setShowGuilt(false)}
+          onCancel={async () => {
+            setShowGuilt(false);
+            await fetchLock(); // Re-sync isBypassFailed from DB immediately
+          }}
           isEmergency={true}
         />
       )}

@@ -47,10 +47,9 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const cleanEmail = email.trim();
-    const cleanPassword = password.trim();
-    const res = await api.post('/auth/login', { email: cleanEmail, password: cleanPassword });
+    // NOTE: Do NOT trim password — spaces in passwords are valid
+    const res = await api.post('/auth/login', { email: cleanEmail, password });
     
-    // Set immediate state for perceived speed
     setUser(res.data.user);
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
@@ -61,10 +60,9 @@ export function AuthProvider({ children }) {
   const signup = async (name, email, password) => {
     const cleanName = name.trim();
     const cleanEmail = email.trim();
-    const cleanPassword = password.trim();
-    const res = await api.post('/auth/signup', { name: cleanName, email: cleanEmail, password: cleanPassword });
+    // NOTE: Do NOT trim password — spaces in passwords are valid
+    const res = await api.post('/auth/signup', { name: cleanName, email: cleanEmail, password });
     
-    // Set immediate state for perceived speed
     setUser(res.data.user);
     localStorage.setItem('lockkey_token', res.data.token);
     localStorage.setItem('lockkey_user', JSON.stringify(res.data.user));
