@@ -55,6 +55,18 @@ export default function CreateLock() {
       const multipliers = { minutes: 1, hours: 60, days: 1440, weeks: 10080 };
       const durationMinutes = val * multipliers[durationUnit];
 
+      if (durationMinutes < 30) {
+        setError('Minimum lock duration is 30 minutes. Shorter locks defeat the purpose.');
+        setLoading(false);
+        return;
+      }
+
+      if (durationMinutes > 129600) { // 90 days
+        setError('Maximum lock duration is 90 days. Contact support for longer commitments.');
+        setLoading(false);
+        return;
+      }
+
       await api.post('/locks', {
         platform: selectedPlatform.trim(),
         password,

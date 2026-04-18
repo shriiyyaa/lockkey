@@ -366,6 +366,32 @@ router.post('/:id/fail-bypass', async (req, res) => {
   }
 });
 
+// POST /api/locks/:id/cancel-unlock — User retreated. Restore lock to active state.
+router.post('/:id/cancel-unlock', async (req, res) => {
+  try {
+    const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });
+    if (!lock) return res.status(404).json({ message: 'Lock not found' });
+
+    if (lock.status !== 'unlocking') {
+      return res.status(400).json({ message: 'Lock is not in an unlocking state.' });
+    }
+
+    lock.status = 'active';
+    lock.earlyUnlockRequestedAt = null;
+    await lock.save();
+
+    res.json({ message: 'Retreat acknowledged. Lock restored to active.', lock: {
+      id: lock.id, status: lock.status, platform: lock.platform,
+      lockStart: lock.lockStart, lockEnd: lock.lockEnd,
+      futureMessage: lock.futureMessage, isBypassFailed: lock.isBypassFailed,
+      challengeCompleted: lock.challengeCompleted, createdAt: lock.createdAt
+    }});
+  } catch (err) {
+    console.error('Cancel unlock error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // DELETE /api/locks/:id
 router.delete('/:id', async (req, res) => {
   try {

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function CountdownTimer({ targetDate, onComplete, size = 'md' }) {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const hasFired = useRef(false);
 
   function calculateTimeLeft() {
     const diff = new Date(targetDate) - new Date();
@@ -17,11 +17,15 @@ export default function CountdownTimer({ targetDate, onComplete, size = 'md' }) 
     };
   }
 
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
   useEffect(() => {
+    hasFired.current = false;
     const timer = setInterval(() => {
       const newTimeLeft = calculateTimeLeft();
       setTimeLeft(newTimeLeft);
-      if (newTimeLeft.total <= 0) {
+      if (newTimeLeft.total <= 0 && !hasFired.current) {
+        hasFired.current = true;
         clearInterval(timer);
         onComplete?.();
       }

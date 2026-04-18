@@ -1,9 +1,92 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 import CountdownTimer from '../components/CountdownTimer';
 import GuiltTrip from '../components/GuiltTrip';
+
+// --- Final Resistance Protocol ---
+// Shown after the 15-minute early unlock timer expires.
+// Forces a 60-second reflection period before the user can proceed.
+function FinalResistanceProtocol({ lock, onProceed, onRetreat, isLoading }) {
+  const [reflectionDone, setReflectionDone] = useState(false);
+
+  return (
+    <motion.div
+      key="final-resistance"
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="geometric-card p-6 sm:p-10 text-center"
+    >
+      <div className="mb-6">
+        <span className="inline-block text-[9px] font-black text-red-500 uppercase tracking-[0.4em] border border-red-300 bg-red-50 px-3 py-1">
+          ⚠ FINAL_RESISTANCE_PROTOCOL INITIATED
+        </span>
+      </div>
+
+      <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-3 uppercase">
+        WAIT PERIOD ENDED
+      </h2>
+      <p className="text-[10px] font-bold text-mono-500 mb-8 uppercase tracking-widest max-w-sm mx-auto">
+        YOU WAITED 15 MINUTES. BUT THE QUESTION REMAINS: DO YOU ACTUALLY NEED THIS?
+      </p>
+
+      {/* Future message — the anchor */}
+      {lock?.futureMessage && (
+        <div className="bg-mono-950 p-6 border-2 border-mono-950 text-left mb-8 shadow-[6px_6px_0_0_#3f3f46]">
+          <span className="block text-[8px] font-black text-mono-400 uppercase tracking-[0.3em] mb-3">
+            ✉ YOU WROTE THIS TO YOURSELF:
+          </span>
+          <p className="text-ivory font-black italic text-sm leading-relaxed">
+            "{lock.futureMessage}"
+          </p>
+        </div>
+      )}
+
+      {/* 60-second reflection countdown */}
+      {!reflectionDone ? (
+        <div className="mb-8">
+          <p className="text-[10px] font-black text-mono-400 uppercase tracking-widest mb-4">
+            REFLECT FOR 60 SECONDS. YOUR CHOICE REVEALS WHO YOU ARE.
+          </p>
+          <div className="max-w-[200px] mx-auto">
+            <CountdownTimer
+              targetDate={new Date(Date.now() + 60000)}
+              onComplete={() => setReflectionDone(true)}
+            />
+          </div>
+        </div>
+      ) : (
+        <AnimatePresence>
+          <motion.div
+            key="choice"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            <p className="text-[10px] font-black text-mono-950 uppercase tracking-widest mb-6">
+              60 SECONDS OF REFLECTION COMPLETE. YOUR CALL.
+            </p>
+            <button
+              onClick={onRetreat}
+              disabled={isLoading}
+              className="btn-primary w-full py-4 text-xs font-black uppercase tracking-[0.2em]"
+            >
+              I'M STRONGER — LOCK IT BACK UP
+            </button>
+            <button
+              onClick={onProceed}
+              disabled={isLoading}
+              className="w-full py-3 text-[10px] font-black text-red-500/50 hover:text-red-600 uppercase tracking-[0.3em] transition-colors"
+            >
+              {isLoading ? '[ DECRYPTING... ]' : 'I still need it — Proceed anyway'}
+            </button>
+          </motion.div>
+        </AnimatePresence>
+      )}
+    </motion.div>
+  );
+}
 
 export default function UnlockFlow() {
   const { id } = useParams();
@@ -11,22 +94,65 @@ export default function UnlockFlow() {
   const [lock, setLock] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // States
-  const [showChallenge, setShowChallenge] = useState(false);
+
   const [showGuilt, setShowGuilt] = useState(false);
+  const [showFinalResistance, setShowFinalResistance] = useState(false);
   const [decryptedPassword, setDecryptedPassword] = useState('');
 
-  useEffect(() => {
-    fetchLock();
-  }, [id]);
-
-  const fetchLock = async () => {
+  const fetchLock = useCallback(async () => {
     try {
       const res = await api.get(`/locks/${id}`);
       setLock(res.data);
+      return res.data;
     } catch (err) {
       setError('Could not load lock details');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchLock();
+  }, [fetchLock]);
+
+  // Reveal password — fully sequential, properly awaited
+  const handleRevealPassword = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.post(`/locks/${id}/reveal`);
+      setDecryptedPassword(res.data.password);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to reveal password. Try refreshing.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // User confirms they still want the password after Final Resistance
+  const handleProceedAfterResistance = async () => {
+    setShowFinalResistance(false);
+    setLoading(true);
+    setError('');
+    try {
+      await api.post(`/locks/${id}/bypass-success`);
+      await handleRevealPassword();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Bypass validation failed.');
+      setLoading(false);
+    }
+  };
+
+  // User retreats — lock is restored to active
+  const handleRetreat = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.post(`/locks/${id}/cancel-unlock`);
+      setShowFinalResistance(false);
+      setLock(res.data.lock);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to cancel unlock. Please refresh.');
     } finally {
       setLoading(false);
     }
@@ -37,7 +163,6 @@ export default function UnlockFlow() {
     setError('');
     try {
       const res = await api.post(`/locks/${id}/request-unlock`, { delayMinutes: 15 });
-      // Update state directly from response for instant UI update
       setLock(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to request unlock');
@@ -46,22 +171,8 @@ export default function UnlockFlow() {
     }
   };
 
-  const handleRevealPassword = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post(`/locks/${id}/reveal`);
-      setDecryptedPassword(res.data.password);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reveal password');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFuckIt = () => {
-    setShowGuilt(true);
-  };
+  // Emergency Fuck-It bypass — still requires full GuiltTrip gauntlet
+  const handleFuckIt = () => setShowGuilt(true);
 
   const handleGuiltComplete = async () => {
     setShowGuilt(false);
@@ -69,11 +180,9 @@ export default function UnlockFlow() {
     setError('');
     try {
       await api.post(`/locks/${id}/fuck-it`);
-      await fetchLock();
-      handleRevealPassword();
+      await handleRevealPassword();
     } catch (err) {
       setError(err.response?.data?.message || 'Emergency bypass failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -83,34 +192,16 @@ export default function UnlockFlow() {
       await api.delete(`/locks/${id}`);
       navigate('/');
     } catch (err) {
-      setError('Failed to delete lock');
+      setError('Failed to delete lock. Please try again.');
     }
   };
 
   const isCompleted = lock?.status === 'completed';
   const isUnlocking = lock?.status === 'unlocking';
-  const unlockAvailableAt = lock?.earlyUnlockRequestedAt 
+  const unlockAvailableAt = lock?.earlyUnlockRequestedAt
     ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
     : null;
-    
-  const handleAutoBypass = async () => {
-    try {
-      setLoading(true);
-      await api.post(`/locks/${lock.id}/bypass-success`);
-      await fetchLock();
-      handleRevealPassword();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Automatic bypass failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isUnlocking && unlockAvailableAt && new Date() >= unlockAvailableAt && !lock?.challengeCompleted) {
-      handleAutoBypass();
-    }
-  }, [isUnlocking, unlockAvailableAt, lock?.challengeCompleted]);
+  const waitExpired = unlockAvailableAt && new Date() >= unlockAvailableAt;
 
   if (loading && !lock) {
     return (
@@ -147,10 +238,21 @@ export default function UnlockFlow() {
         </h1>
       </div>
 
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-red-50 border-2 border-red-500 text-red-600 text-[10px] font-black px-4 py-3 shadow-[3px_3px_0_0_#ef4444] tracking-[0.1em]"
+        >
+          [!] {error.toUpperCase()}
+        </motion.div>
+      )}
+
       <AnimatePresence mode="popLayout">
-        {/* State 1: Password Revealed */}
+        {/* STATE 1: Password Revealed */}
         {decryptedPassword && (
           <motion.div
+            key="revealed"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             className="geometric-card p-6 sm:p-10 text-center"
@@ -159,10 +261,10 @@ export default function UnlockFlow() {
               DECRYPTION SUCCESSFUL
             </h2>
             <p className="text-[10px] font-black text-mono-400 mb-8 uppercase tracking-widest">
-              TRANSFER KEY SECURELY
+              TRANSFER KEY SECURELY. DO NOT SCREENSHOT.
             </p>
-            
-            <div className="bg-mono-100 border-2 border-mono-950 p-6 mb-8 relative group">
+
+            <div className="bg-mono-100 border-2 border-mono-950 p-6 mb-8 relative">
               <code className="text-base sm:text-lg font-mono text-mono-950 font-black select-all break-all tracking-normal">
                 {decryptedPassword}
               </code>
@@ -195,9 +297,10 @@ export default function UnlockFlow() {
           </motion.div>
         )}
 
-        {/* State 2: Ready to Reveal */}
+        {/* STATE 2: Natural completion — Ready to Reveal */}
         {!decryptedPassword && isCompleted && (
           <motion.div
+            key="completed"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="geometric-card p-6 sm:p-10 text-center"
@@ -206,11 +309,11 @@ export default function UnlockFlow() {
               PROTOCOL EXPIRED
             </h2>
             <p className="text-[10px] font-bold text-mono-400 mb-8 uppercase tracking-widest">
-              COMMITMENT DURATION COMPLETED.
+              COMMITMENT DURATION COMPLETED. YOU EARNED THIS.
             </p>
             <div className="flex justify-center gap-4">
-              <button onClick={handleRevealPassword} className="btn-primary">
-                REVEAL ACCESS KEY
+              <button onClick={handleRevealPassword} disabled={loading} className="btn-primary">
+                {loading ? '[ DECRYPTING... ]' : 'REVEAL ACCESS KEY'}
               </button>
               <button onClick={handleDelete} className="btn-danger">
                 PURGE LOCK
@@ -219,11 +322,21 @@ export default function UnlockFlow() {
           </motion.div>
         )}
 
+        {/* STATE 3: Final Resistance Protocol — after 15-min wait */}
+        {!decryptedPassword && !isCompleted && showFinalResistance && (
+          <FinalResistanceProtocol
+            key="resistance"
+            lock={lock}
+            onProceed={handleProceedAfterResistance}
+            onRetreat={handleRetreat}
+            isLoading={loading}
+          />
+        )}
 
-
-        {/* State 4: Unlocking (Delay) */}
-        {!decryptedPassword && !isCompleted && isUnlocking && !showChallenge && unlockAvailableAt && (
+        {/* STATE 4: Unlocking — 15-minute countdown in progress */}
+        {!decryptedPassword && !isCompleted && isUnlocking && !showFinalResistance && unlockAvailableAt && (
           <motion.div
+            key="unlocking"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="geometric-card p-6 sm:p-10 text-center"
@@ -231,12 +344,23 @@ export default function UnlockFlow() {
             <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-6 uppercase">
               FORCE UNLOCK SEQUENCE
             </h2>
-            
+
             <div className="mb-10 p-6 bg-mono-100 border-2 border-mono-950 shadow-[4px_4px_0_0_#3f3f46]">
-              <CountdownTimer 
-                targetDate={unlockAvailableAt} 
-                onComplete={handleAutoBypass}
-              />
+              {waitExpired ? (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onClick={() => setShowFinalResistance(true)}
+                  className="btn-danger w-full py-4 font-black uppercase tracking-[0.2em]"
+                >
+                  PROCEED TO FINAL RESISTANCE
+                </motion.button>
+              ) : (
+                <CountdownTimer
+                  targetDate={unlockAvailableAt}
+                  onComplete={() => setShowFinalResistance(true)}
+                />
+              )}
             </div>
 
             {lock.futureMessage && (
@@ -244,15 +368,15 @@ export default function UnlockFlow() {
                 <span className="block text-[8px] font-black text-mono-400 uppercase tracking-widest mb-2 border-b-2 border-mono-100 pb-2">
                   ARCHIVED PROTOCOL NOTE:
                 </span>
-                <p className="text-mono-950 font-black italic">"{lock.futureMessage.toUpperCase()}"</p>
+                <p className="text-mono-950 font-black italic">"{lock.futureMessage}"</p>
               </div>
             )}
-            
+
             <p className="text-mono-400 font-bold mt-8 text-sm uppercase tracking-widest">
-              Close this window, take a deep breath. A puzzle awaits at the end.
+              Close this. Take a walk. Ask yourself if you really need this.
             </p>
 
-            <div className="mt-12 pt-8 border-t border-ivory/5">
+            <div className="mt-12 pt-8 border-t border-mono-200">
               {lock.isBypassFailed ? (
                 <p className="text-[10px] font-black text-red-600/40 uppercase tracking-[0.2em] italic">
                   BYPASS_PROTOCOL: PERMANENT_LOCKOUT_ACTIVE. NO SHORTCUTS REMAIN.
@@ -264,16 +388,17 @@ export default function UnlockFlow() {
                   className="text-[10px] font-black text-red-500/50 hover:text-red-500 uppercase tracking-[0.3em] transition-colors"
                   id="btn-fuck-it-unlocking"
                 >
-                  FUCK IT — I CAN'T WAIT
+                  FUCK IT — I CAN'T WAIT EVEN 15 MINUTES
                 </button>
               )}
             </div>
           </motion.div>
         )}
 
-        {/* State 5: Active */}
+        {/* STATE 5: Active — main encryption screen */}
         {!decryptedPassword && !isCompleted && !isUnlocking && (
           <motion.div
+            key="active"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="geometric-card p-6 sm:p-10 text-center"
@@ -286,18 +411,25 @@ export default function UnlockFlow() {
               <span className="block text-mono-400 font-black uppercase tracking-[0.2em] text-[8px] mb-4">
                 PROTOCOL EXPIRY COUNTDOWN
               </span>
-              <CountdownTimer 
-                targetDate={new Date(lock.lockEnd)} 
+              <CountdownTimer
+                targetDate={new Date(lock.lockEnd)}
                 onComplete={() => fetchLock()}
               />
             </div>
 
+            {lock.futureMessage && (
+              <div className="bg-mono-50 p-6 border-2 border-mono-950 text-left mb-8">
+                <span className="block text-[8px] font-black text-mono-400 uppercase tracking-widest mb-2 border-b-2 border-mono-100 pb-2">
+                  YOUR NOTE TO YOURSELF:
+                </span>
+                <p className="text-mono-950 font-black italic">"{lock.futureMessage}"</p>
+              </div>
+            )}
+
             <div className="mt-8 pt-8 border-t-2 border-dashed border-mono-200">
-              <h3 className="sub-heading text-mono-950 mb-4">
-                ABORT SEQUENCE?
-              </h3>
+              <h3 className="sub-heading text-mono-950 mb-4">ABORT SEQUENCE?</h3>
               <p className="text-[10px] font-bold text-mono-500 mb-6 max-w-xs mx-auto">
-                EARLY TERMINATION REQUIRES COGNITIVE CHALLENGE AND 15M DELAY.
+                EARLY TERMINATION REQUIRES 15-MINUTE WAIT + FINAL REFLECTION.
               </p>
               <button
                 onClick={handleRequestUnlock}
@@ -329,11 +461,13 @@ export default function UnlockFlow() {
         )}
       </AnimatePresence>
 
+      {/* Emergency Bypass Gauntlet overlay */}
       {showGuilt && (
-        <GuiltTrip 
+        <GuiltTrip
           lockId={lock.id}
           onComplete={handleGuiltComplete}
           onCancel={() => setShowGuilt(false)}
+          isEmergency={true}
         />
       )}
     </div>

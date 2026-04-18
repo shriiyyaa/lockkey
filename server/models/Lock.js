@@ -16,15 +16,15 @@ const Lock = sequelize.define('Lock', {
     allowNull: false,
   },
   encryptedPassword: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   iv: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   authTag: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   lockStart: {

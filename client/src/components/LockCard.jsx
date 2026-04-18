@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import api from '../utils/api';
 
 export default function LockCard({ lock, index, onDelete }) {
   const [timeLeft, setTimeLeft] = useState('');
@@ -37,7 +38,7 @@ export default function LockCard({ lock, index, onDelete }) {
     };
 
     calculateTime();
-    const timer = setInterval(calculateTime, 60000);
+    const timer = setInterval(calculateTime, 1000);
     return () => clearInterval(timer);
   }, [lock, isActive]);
 
