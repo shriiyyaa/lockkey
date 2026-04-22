@@ -181,15 +181,11 @@ const MAX_GUESSES = 6;
 const VALID_WORDS = WORDS.filter(w => w.length === WORD_LENGTH);
 
 export default function WordleGame({ onWin, onLose }) {
-  const [targetWord, setTargetWord] = useState('');
+  const [targetWord, setTargetWord] = useState(() => VALID_WORDS[Math.floor(Math.random() * VALID_WORDS.length)]);
   const [guesses, setGuesses] = useState([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [invalidWord, setInvalidWord] = useState(false); // shake state
-
-  useEffect(() => {
-    setTargetWord(VALID_WORDS[Math.floor(Math.random() * VALID_WORDS.length)]);
-  }, []);
 
   const handleKeyDown = useCallback(
     (e) => {

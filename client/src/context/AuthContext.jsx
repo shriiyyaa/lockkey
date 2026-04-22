@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const AuthContext = createContext(null);
@@ -6,6 +6,12 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('lockkey_token');
+    localStorage.removeItem('lockkey_user');
+    setUser(null);
+  }, []);
 
   useEffect(() => {
     // PRE-WARM PROTOCOL: Wake up the server as soon as the app loads to mitigate cold starts
@@ -23,7 +29,7 @@ export function AuthProvider({ children }) {
           setUser(JSON.parse(savedUser));
           setLoading(false); // OPTIMISTIC LOADING: Show the app instantly!
           isCached = true;
-        } catch (e) {
+        } catch {
           console.error("AuthContext: Cached user corrupted, fetching fresh...");
         }
       }
@@ -33,8 +39,7 @@ export function AuthProvider({ children }) {
           setUser(res.data);
           localStorage.setItem('lockkey_user', JSON.stringify(res.data));
         })
-        .catch(err => {
-          console.error("AuthContext: Session verification failed:", err.message);
+        .catch(() => {
           logout(); // Clear invalid token
         })
         .finally(() => {
@@ -43,7 +48,7 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   const login = async (email, password) => {
     const cleanEmail = email.trim();
@@ -70,12 +75,6 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const logout = () => {
-    localStorage.removeItem('lockkey_token');
-    localStorage.removeItem('lockkey_user');
-    setUser(null);
-  };
-
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
       {children}
@@ -83,6 +82,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
