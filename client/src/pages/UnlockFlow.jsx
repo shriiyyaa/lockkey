@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
@@ -108,7 +108,7 @@ export default function UnlockFlow() {
       const res = await api.get(`/locks/${id}`);
       setLock(res.data);
       return res.data;
-    } catch (err) {
+    } catch {
       setError('Could not load lock details');
     } finally {
       setLoading(false);
@@ -118,9 +118,11 @@ export default function UnlockFlow() {
   // Derived lock state — declared before useEffects that depend on them
   const isCompleted = lock?.status === 'completed';
   const isUnlocking = lock?.status === 'unlocking';
-  const unlockAvailableAt = lock?.earlyUnlockRequestedAt
-    ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
-    : null;
+  const unlockAvailableAt = React.useMemo(() => {
+    return lock?.earlyUnlockRequestedAt
+      ? new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60000)
+      : null;
+  }, [lock?.earlyUnlockRequestedAt, lock?.earlyUnlockDelay]);
 
   useEffect(() => {
     fetchLock();
@@ -219,7 +221,7 @@ export default function UnlockFlow() {
       setDecryptedPassword(''); // Clear from memory before navigating
       await api.delete(`/locks/${id}`);
       navigate('/');
-    } catch (err) {
+    } catch {
       setError('Failed to delete lock. Please try again.');
     }
   };
