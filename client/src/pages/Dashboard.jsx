@@ -9,9 +9,17 @@ import StatsPanel from '../components/StatsPanel';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [locks, setLocks] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [locks, setLocks] = useState(() => {
+    const saved = localStorage.getItem('lockkey_dashboard_locks');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [stats, setStats] = useState(() => {
+    const saved = localStorage.getItem('lockkey_dashboard_stats');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [loading, setLoading] = useState(() => {
+    return !localStorage.getItem('lockkey_dashboard_locks'); // Only show global loader if we have NO cached data
+  });
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -28,6 +36,8 @@ export default function Dashboard() {
       ]);
       setLocks(locksRes.data);
       setStats(statsRes.data);
+      localStorage.setItem('lockkey_dashboard_locks', JSON.stringify(locksRes.data));
+      localStorage.setItem('lockkey_dashboard_stats', JSON.stringify(statsRes.data));
     } catch (err) {
       console.error('Failed to fetch data:', err);
     } finally {
