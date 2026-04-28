@@ -8,31 +8,23 @@ import Dashboard from './pages/Dashboard';
 import CreateLock from './pages/CreateLock';
 import UnlockFlow from './pages/UnlockFlow';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-
 function AuthRedirect({ children }) {
   const { user, loading } = useAuth();
   
+  // INSTANT: If user exists (from cache), redirect immediately — zero wait
+  if (user) return <Navigate to="/" replace />;
+  
+  // Only show loading if we're genuinely waiting for auth validation (rare)
   if (loading) {
     return (
-      <div className="min-h-screen bg-mono-950 flex flex-col items-center justify-center space-y-6">
+      <div className="min-h-screen bg-mono-950 flex items-center justify-center">
         <div className="text-ivory font-black text-[10px] tracking-[0.3em] uppercase animate-pulse">
-          AUTHENTICATING_CRYPTO_PROTOCOL...
-        </div>
-        <div className="w-48 h-1 bg-mono-900 border border-mono-800 overflow-hidden relative">
-          <motion.div 
-            className="h-full bg-ivory"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-          />
+          AUTHENTICATING...
         </div>
       </div>
     );
   }
   
-  if (user) return <Navigate to="/" replace />;
   return children;
 }
 

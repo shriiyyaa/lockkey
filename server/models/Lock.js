@@ -41,7 +41,7 @@ const Lock = sequelize.define('Lock', {
     defaultValue: '',
   },
   status: {
-    // ENUM string mapped to 'active', 'unlocking', 'completed'
+    // 'active' | 'unlocking' | 'completed'
     type: DataTypes.STRING,
     defaultValue: 'active',
   },
@@ -60,7 +60,21 @@ const Lock = sequelize.define('Lock', {
   isBypassFailed: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  }
+  },
+  // ── Purgatory Protocol tracking ─────────────────────────────────────────
+  // Timestamps stored server-side to prevent client-side spoofing
+  purgatoryPhase1At: {
+    type: DataTypes.DATE,
+    allowNull: true, // set when user completes The Void
+  },
+  purgatoryPhase2At: {
+    type: DataTypes.DATE,
+    allowNull: true, // set when user completes The Gauntlet
+  },
+  purgatoryPhase3At: {
+    type: DataTypes.DATE,
+    allowNull: true, // set when user completes The Mirror
+  },
 }, {
   timestamps: true,
 });

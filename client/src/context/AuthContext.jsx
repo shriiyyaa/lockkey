@@ -3,51 +3,53 @@ import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
+// INSTANT INIT: Parse cached user synchronously at module load time
+function getCachedUser() {
+  try {
+    const saved = localStorage.getItem('lockkey_user');
+    const token = localStorage.getItem('lockkey_token');
+    if (saved && token) return JSON.parse(saved);
+  } catch { /* corrupted cache — ignore */ }
+  return null;
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // ZERO-LATENCY: If we have a cached user + token, we're immediately "logged in"
+  // No loading state, no spinner, no waiting for /auth/me
+  const [user, setUser] = useState(getCachedUser);
+  const [loading, setLoading] = useState(() => !getCachedUser() && !!localStorage.getItem('lockkey_token'));
 
   const logout = useCallback(() => {
     localStorage.removeItem('lockkey_token');
     localStorage.removeItem('lockkey_user');
+    localStorage.removeItem('lockkey_dashboard_locks');
+    localStorage.removeItem('lockkey_dashboard_stats');
     setUser(null);
   }, []);
 
   useEffect(() => {
-    // PRE-WARM PROTOCOL: Wake up the server as soon as the app loads to mitigate cold starts
-    fetch('https://lockkey-h8ib.onrender.com/api/locks/stats', { mode: 'no-cors' }).catch(() => {});
+    // PRE-WARM: Wake up the server in the background (non-blocking, fire-and-forget)
+    fetch('https://lockkey-h8ib.onrender.com/api/health', { mode: 'no-cors' }).catch(() => {});
 
     const token = localStorage.getItem('lockkey_token');
-    const savedUser = localStorage.getItem('lockkey_user');
-
-    // RECOVERY MODE: If we have a token, we can ALWAYS try to fetch the user profile
-    // even if the cached 'lockkey_user' is missing or corrupted.
-    if (token) {
-      let isCached = false;
-      if (savedUser) {
-        try {
-          setUser(JSON.parse(savedUser));
-          setLoading(false); // OPTIMISTIC LOADING: Show the app instantly!
-          isCached = true;
-        } catch {
-          console.error("AuthContext: Cached user corrupted, fetching fresh...");
-        }
-      }
-
-      api.get('/auth/me')
-        .then(res => {
-          setUser(res.data);
-          localStorage.setItem('lockkey_user', JSON.stringify(res.data));
-        })
-        .catch(() => {
-          logout(); // Clear invalid token
-        })
-        .finally(() => {
-          if (!isCached) setLoading(false);
-        });
-    } else {
+    if (!token) {
       setLoading(false);
+      return;
     }
+
+    // BACKGROUND SYNC: Silently validate + refresh user data
+    // The UI is ALREADY showing the cached user — this just keeps it fresh
+    api.get('/auth/me')
+      .then(res => {
+        setUser(res.data);
+        localStorage.setItem('lockkey_user', JSON.stringify(res.data));
+      })
+      .catch(() => {
+        logout(); // Token expired/invalid — force re-login
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [logout]);
 
   const login = async (email, password) => {

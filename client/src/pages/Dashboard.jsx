@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -7,19 +7,53 @@ import api from '../utils/api';
 import LockCard from '../components/LockCard';
 import StatsPanel from '../components/StatsPanel';
 
+// Skeleton card shown while data loads in the background
+function SkeletonCard() {
+  return (
+    <div className="geometric-card animate-pulse">
+      <div className="p-5 space-y-4">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 flex-1">
+            <div className="h-4 bg-mono-200 w-2/3 border border-mono-300" />
+            <div className="h-3 bg-mono-100 w-1/4 border border-mono-200" />
+          </div>
+          <div className="h-3 bg-mono-100 w-12 border border-mono-200" />
+        </div>
+        <div className="pt-4 border-t-2 border-mono-100 space-y-2">
+          <div className="flex justify-between">
+            <div className="h-2 bg-mono-100 w-16" />
+            <div className="h-2 bg-mono-100 w-12" />
+          </div>
+          <div className="h-4 bg-mono-100 border-2 border-mono-200" />
+        </div>
+      </div>
+      <div className="p-4 bg-mono-100 border-t-2 border-mono-200">
+        <div className="h-8 bg-mono-200 border border-mono-300" />
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
+  
+  // INSTANT: Initialize from cache — renders immediately, no waiting
   const [locks, setLocks] = useState(() => {
-    const saved = localStorage.getItem('lockkey_dashboard_locks');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('lockkey_dashboard_locks');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
   });
   const [stats, setStats] = useState(() => {
-    const saved = localStorage.getItem('lockkey_dashboard_stats');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('lockkey_dashboard_stats');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
   });
-  const [loading, setLoading] = useState(() => {
-    return !localStorage.getItem('lockkey_dashboard_locks'); // Only show global loader if we have NO cached data
-  });
+  
+  // NEVER block the UI. Only show skeletons if we truly have zero cached data
+  const hasCachedData = useRef(!!localStorage.getItem('lockkey_dashboard_locks'));
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -29,6 +63,7 @@ export default function Dashboard() {
   }, []);
 
   const fetchData = async () => {
+    setIsRefreshing(true);
     try {
       const [locksRes, statsRes] = await Promise.all([
         api.get('/locks'),
@@ -38,10 +73,11 @@ export default function Dashboard() {
       setStats(statsRes.data);
       localStorage.setItem('lockkey_dashboard_locks', JSON.stringify(locksRes.data));
       localStorage.setItem('lockkey_dashboard_stats', JSON.stringify(statsRes.data));
+      hasCachedData.current = true;
     } catch (err) {
       console.error('Failed to fetch data:', err);
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -57,14 +93,6 @@ export default function Dashboard() {
 
   const activeLockCount = locks.filter(l => l.status === 'active' || l.status === 'unlocking').length;
   const completedLockCount = locks.filter(l => l.status === 'completed').length;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-ivory font-black text-sm animate-pulse tracking-widest uppercase">Accessing lockkey...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-10">
@@ -83,6 +111,12 @@ export default function Dashboard() {
               ? `STATUS: ${activeLockCount} ACTIVE LOCKS`
               : 'STATUS: NO ACTIVE LOCKS'
             }
+            {/* Subtle sync indicator */}
+            {isRefreshing && (
+              <span className="ml-3 text-[8px] text-mono-600 tracking-[0.2em] animate-pulse">
+                SYNCING...
+              </span>
+            )}
           </p>
         </div>
         <Link to="/create" id="btn-new-lock" className="btn-primary inline-flex items-center gap-2 whitespace-nowrap shadow-[2px_2px_0_0_#000]">
@@ -116,9 +150,13 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Lock Cards */}
+        {/* Lock Cards — show skeletons only if zero cached data and still refreshing */}
         <AnimatePresence mode="popLayout">
-          {filteredLocks.length > 0 ? (
+          {!hasCachedData.current && isRefreshing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+            </div>
+          ) : filteredLocks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredLocks.map((lock, index) => (
                 <LockCard 
