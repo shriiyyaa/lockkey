@@ -204,7 +204,7 @@ export default function CreateLock() {
               <select
                 value={durationUnit}
                 onChange={(e) => setDurationUnit(e.target.value)}
-                className="input-field flex-1 bg-mono-900/40 text-white font-black text-xl tracking-wide uppercase cursor-pointer"
+                className="input-field flex-1 bg-mono-950 text-ivory font-black text-xl tracking-wide uppercase cursor-pointer"
                 id="select-duration-unit"
               >
                 <option value="minutes">MINS</option>

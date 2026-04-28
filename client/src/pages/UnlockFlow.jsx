@@ -166,7 +166,7 @@ export default function UnlockFlow() {
   return (
     <div className="max-w-3xl mx-auto pb-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="heading-primary flex items-center gap-2">
+        <h1 className="heading-primary flex flex-wrap items-center gap-2">
           {lock.platform.toUpperCase()}
           <span className={`px-2 py-0.5 rounded-none text-[8px] border-2 font-black tracking-[0.2em] uppercase ${
             isCompleted ? 'bg-ivory text-mono-950 border-mono-950' : 'bg-transparent border-mono-700 text-mono-500'

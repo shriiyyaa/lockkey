@@ -51,8 +51,8 @@ export default function Navbar() {
             New Lock
           </Link>
 
-          <div className="ml-2 sm:ml-4 pl-2 sm:pl-4 border-l-2 border-mono-700 flex items-center gap-4">
-            <div className="flex items-center gap-3" title={user.name}>
+          <div className="ml-2 sm:ml-4 pl-2 sm:pl-4 border-l-2 border-mono-700 flex items-center gap-2 sm:gap-4">
+            <div className="hidden sm:flex items-center gap-3" title={user.name}>
               <div className="w-8 h-8 flex items-center justify-center rounded-none bg-ivory border-2 border-mono-950 shadow-[2px_2px_0_0_#3f3f46] text-mono-950 font-black text-sm">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
