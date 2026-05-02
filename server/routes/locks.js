@@ -308,7 +308,7 @@ router.post('/:id/reveal', async (req, res) => {
   }
 });
 
-// POST /api/locks/:id/bypass-success — Unified endpoint for gauntlet completion
+// POST /api/locks/:id/bypass-success — Unified endpoint for early unlock completion
 router.post('/:id/bypass-success', async (req, res) => {
   try {
     const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });
@@ -317,12 +317,20 @@ router.post('/:id/bypass-success', async (req, res) => {
       return res.status(404).json({ message: 'Lock not found' });
     }
 
-    // Immediate completion upon winning the gauntlet
+    if (lock.status === 'unlocking') {
+      const unlockTime = new Date(lock.earlyUnlockRequestedAt.getTime() + lock.earlyUnlockDelay * 60 * 1000);
+      if (new Date() < unlockTime) {
+        return res.status(400).json({ message: 'Delay period has not ended yet' });
+      }
+    } else if (lock.status !== 'completed') {
+      return res.status(400).json({ message: 'Lock is not in a valid state for completion' });
+    }
+
     lock.status = 'completed';
     lock.challengeCompleted = true;
     await lock.save();
 
-    res.json({ message: 'Bypass protocol validated. Access granted.' });
+    res.json({ message: 'Wait period validated. Access granted.' });
   } catch (err) {
     console.error('Bypass success error:', err);
     res.status(500).json({ message: 'Server error' });
@@ -409,70 +417,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /api/locks/:id/purgatory-phase — Record server-side purgatory phase completion
-// Called by the client when each phase finishes. Validates minimum time since unlock request.
-router.post('/:id/purgatory-phase', async (req, res) => {
-  try {
-    const lock = await Lock.findOne({ where: { id: req.params.id, userId: req.user.id } });
-
-    if (!lock) return res.status(404).json({ message: 'Lock not found' });
-    if (lock.status !== 'unlocking') return res.status(400).json({ message: 'Lock is not in unlocking state' });
-
-    const { phase } = req.body;
-    if (![1, 2, 3].includes(Number(phase))) {
-      return res.status(400).json({ message: 'Invalid phase number (must be 1, 2, or 3)' });
-    }
-
-    const now = new Date();
-    const phaseNum = Number(phase);
-
-    // Minimum elapsed time validation (server-side enforcement):
-    // Phase 1 requires ≥ 4.5 min (270s) since unlock requested (5-min hold, allow 30s buffer)
-    // Phase 2 requires ≥ 4 min (240s) since phase 1 completed
-    // Phase 3 requires ≥ 1 min (60s) since phase 2 completed (mirror cooldown)
-    const MIN_PHASE_SECONDS = { 1: 270, 2: 240, 3: 60 };
-
-    if (phaseNum === 1) {
-      if (!lock.earlyUnlockRequestedAt) {
-        return res.status(400).json({ message: 'Unlock not requested yet' });
-      }
-      const elapsed = (now - new Date(lock.earlyUnlockRequestedAt)) / 1000;
-      if (elapsed < MIN_PHASE_SECONDS[1]) {
-        return res.status(400).json({ message: `Phase 1 minimum time not reached (${Math.round(MIN_PHASE_SECONDS[1] - elapsed)}s remaining)` });
-      }
-      lock.purgatoryPhase1At = now;
-    } else if (phaseNum === 2) {
-      if (!lock.purgatoryPhase1At) {
-        return res.status(400).json({ message: 'Phase 1 not completed yet' });
-      }
-      const elapsed = (now - new Date(lock.purgatoryPhase1At)) / 1000;
-      if (elapsed < MIN_PHASE_SECONDS[2]) {
-        return res.status(400).json({ message: `Phase 2 minimum time not reached (${Math.round(MIN_PHASE_SECONDS[2] - elapsed)}s remaining)` });
-      }
-      lock.purgatoryPhase2At = now;
-    } else if (phaseNum === 3) {
-      if (!lock.purgatoryPhase2At) {
-        return res.status(400).json({ message: 'Phase 2 not completed yet' });
-      }
-      const elapsed = (now - new Date(lock.purgatoryPhase2At)) / 1000;
-      if (elapsed < MIN_PHASE_SECONDS[3]) {
-        return res.status(400).json({ message: `Phase 3 minimum time not reached (${Math.round(MIN_PHASE_SECONDS[3] - elapsed)}s remaining)` });
-      }
-      lock.purgatoryPhase3At = now;
-    }
-
-    await lock.save();
-    res.json({ message: `Phase ${phaseNum} recorded.`, phase: phaseNum });
-  } catch (err) {
-    console.error('Purgatory phase error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Override bypass-success: require all 3 purgatory phases server-side
-// (bypass-success is also called by the Purgatory "proceed" path)
-// This guard is a soft check — we already validated timestamps above,
-// so this just ensures the sequence wasn't skipped.
+// Endpoints related to Purgatory phases have been removed in favor of passive wait.
 
 module.exports = router;
 

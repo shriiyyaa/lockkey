@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
-import PurgatoryProtocol from '../components/PurgatoryProtocol';
 import GuiltTrip from '../components/GuiltTrip';
 import SecurePasswordDisplay from '../components/SecurePasswordDisplay';
 import CountdownTimer from '../components/CountdownTimer';
@@ -15,7 +14,6 @@ export default function UnlockFlow() {
   const [error, setError] = useState('');
 
   const [showGuilt, setShowGuilt] = useState(false);
-  const [showPurgatory, setShowPurgatory] = useState(false);
   const [decryptedPassword, setDecryptedPassword] = useState('');
 
   const fetchLock = useCallback(async () => {
@@ -51,23 +49,20 @@ export default function UnlockFlow() {
     }
   };
 
-  // ── Purgatory: user made it all the way through → proceed ──────────────
-  const handlePurgatoryProceed = async () => {
-    setShowPurgatory(false);
+  // ── Unlocking state actions ──────────────────────────────────────────────
+  const handleCompleteWait = async () => {
     setLoading(true);
     setError('');
     try {
       await api.post(`/locks/${id}/bypass-success`);
       await handleRevealPassword();
     } catch (err) {
-      setError(err.response?.data?.message || 'Bypass validation failed.');
+      setError(err.response?.data?.message || 'Failed to complete unlock. Try again.');
       setLoading(false);
     }
   };
 
-  // ── Purgatory: user chose to retreat → restore lock ────────────────────
-  const handlePurgatoryRetreat = async () => {
-    setShowPurgatory(false);
+  const handleCancelUnlock = async () => {
     setLoading(true);
     setError('');
     try {
@@ -80,28 +75,19 @@ export default function UnlockFlow() {
     }
   };
 
-  // ── Request early unlock → starts purgatory immediately ────────────────
+  // ── Request early unlock ───────────────────────────────────────────────
   const handleRequestUnlock = async () => {
     setLoading(true);
     setError('');
     try {
       const res = await api.post(`/locks/${id}/request-unlock`, { delayMinutes: 15 });
       setLock(res.data);
-      // Immediately launch Purgatory — no passive waiting
-      setShowPurgatory(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to request unlock');
     } finally {
       setLoading(false);
     }
   };
-
-  // ── If already in 'unlocking' state when page loads, go straight to Purgatory ──
-  useEffect(() => {
-    if (isUnlocking && !showPurgatory && !decryptedPassword) {
-      setShowPurgatory(true);
-    }
-  }, [isUnlocking, showPurgatory, decryptedPassword]);
 
   // ── Emergency Fuck-It bypass ────────────────────────────────────────────
   const handleFuckIt = () => setShowGuilt(true);
@@ -152,16 +138,7 @@ export default function UnlockFlow() {
     );
   }
 
-  // ─── Purgatory fullscreen overlay ────────────────────────────────────────
-  if (showPurgatory && !decryptedPassword) {
-    return (
-      <PurgatoryProtocol
-        lock={lock}
-        onProceed={handlePurgatoryProceed}
-        onRetreat={handlePurgatoryRetreat}
-      />
-    );
-  }
+  // ─── Passive fullscreen overlay (removed Purgatory) ──────────────────────
 
   return (
     <div className="max-w-3xl mx-auto pb-12">
@@ -267,26 +244,23 @@ export default function UnlockFlow() {
             <div className="mt-8 pt-8 border-t-2 border-dashed border-mono-200">
               <h3 className="sub-heading text-mono-950 mb-2">ABORT SEQUENCE?</h3>
 
-              {/* Purgatory warning callout */}
-              <div className="bg-red-50 border-2 border-red-200 p-4 mb-6 text-left">
-                <p className="text-[9px] font-black text-red-700 uppercase tracking-widest mb-1">⚠ PURGATORY PROTOCOL REQUIRED</p>
-                <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest">
-                  PHASE 1: 5-MIN HOLD · PHASE 2: 20 CHALLENGES · PHASE 3: MIRROR REFLECTION
-                </p>
-                <p className="text-[8px] font-bold text-red-400 uppercase tracking-widest mt-1">
-                  TOTAL ~15 MIN OF ACTIVE ENGAGEMENT. NO PASSIVE WAITING.
+              {/* Early unlock warning callout */}
+              <div className="bg-yellow-50 border-2 border-yellow-200 p-4 mb-6 text-left">
+                <p className="text-[9px] font-black text-yellow-700 uppercase tracking-widest mb-1">⚠ EARLY UNLOCK PENALTY</p>
+                <p className="text-[8px] font-bold text-yellow-600 uppercase tracking-widest">
+                  INITIATING AN EARLY UNLOCK REQUIRES A MANDATORY 15-MINUTE PASSIVE WAIT.
                 </p>
               </div>
 
               <button
                 onClick={handleRequestUnlock}
                 disabled={loading || lock.isBypassFailed}
-                className={`btn-danger w-full sm:w-auto px-10 border ${
+                className={`btn-primary w-full sm:w-auto px-10 border ${
                   loading || lock.isBypassFailed ? 'cursor-not-allowed opacity-50' : ''
                 }`}
                 id="btn-request-unlock"
               >
-                {loading ? '[ PROCESSING... ]' : lock.isBypassFailed ? 'PURGATORY LOCKED OUT' : 'ENTER THE PURGATORY'}
+                {loading ? '[ PROCESSING... ]' : lock.isBypassFailed ? 'EARLY UNLOCK DISABLED' : 'REQUEST EARLY UNLOCK'}
               </button>
 
               <div className="mt-8">
@@ -305,6 +279,52 @@ export default function UnlockFlow() {
                   </button>
                 )}
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* STATE 4: Passive Unlocking Wait */}
+        {!decryptedPassword && isUnlocking && (
+          <motion.div
+            key="unlocking"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="geometric-card p-6 sm:p-10 text-center"
+          >
+            <h2 className="text-xl sm:text-2xl font-black text-mono-950 mb-6 uppercase">
+              EARLY UNLOCK INITIATED
+            </h2>
+
+            <div className="bg-mono-100 border-2 border-mono-950 p-8 shadow-[4px_4px_0_0_#3f3f46] mb-10 mx-auto max-w-xs">
+              <span className="block text-mono-400 font-black uppercase tracking-[0.2em] text-[8px] mb-4">
+                PASSIVE WAIT COUNTDOWN
+              </span>
+              <CountdownTimer
+                targetDate={new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60 * 1000)}
+                onComplete={() => fetchLock()}
+              />
+            </div>
+            
+            <p className="text-[10px] font-bold text-mono-500 mb-8 uppercase tracking-widest">
+              PLEASE WAIT UNTIL THE TIMER EXPIRES TO REVEAL YOUR PASSWORD.
+            </p>
+
+            <button 
+              onClick={handleCompleteWait}
+              disabled={loading || new Date() < new Date(new Date(lock.earlyUnlockRequestedAt).getTime() + lock.earlyUnlockDelay * 60 * 1000)}
+              className="btn-primary w-full"
+            >
+              {loading ? '[ PROCESSING... ]' : 'COMPLETE UNLOCK'}
+            </button>
+            
+            <div className="mt-4">
+              <button 
+                onClick={handleCancelUnlock}
+                disabled={loading}
+                className="text-[10px] font-black text-mono-400 hover:text-mono-950 uppercase tracking-[0.2em] transition-colors py-2"
+              >
+                CANCEL & RETURN TO ACTIVE LOCK
+              </button>
             </div>
           </motion.div>
         )}
