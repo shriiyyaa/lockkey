@@ -188,11 +188,11 @@ router.post('/:id/request-unlock', async (req, res) => {
       return res.status(400).json({ message: 'Lock is not active' });
     }
 
-    // Set unlock delay (15 minutes default)
-    const delay = req.body.delayMinutes || 15;
+    // Set unlock delay (1 minute default)
+    const delay = req.body.delayMinutes || 1;
     lock.status = 'unlocking';
     lock.earlyUnlockRequestedAt = new Date();
-    lock.earlyUnlockDelay = Math.min(Math.max(delay, 5), 30);
+    lock.earlyUnlockDelay = Math.min(Math.max(delay, 1), 30);
     await lock.save();
 
     res.json({
