@@ -7,7 +7,7 @@ export default function LockCard({ lock, index, onDelete }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [progress, setProgress] = useState(0);
 
-  const isActive = lock.status === 'active' || lock.status === 'unlocking';
+  const isActive = lock.status === 'active';
 
   useEffect(() => {
     if (!isActive) return;
@@ -77,7 +77,6 @@ export default function LockCard({ lock, index, onDelete }) {
             </h3>
             <span className={`inline-block px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border-2 ${
               lock.status === 'completed' ? 'bg-green-100 text-green-700 border-green-700/30' :
-              lock.status === 'unlocking' ? 'bg-yellow-100 text-yellow-700 border-yellow-700/30' :
               'bg-mono-200 text-mono-600 border-mono-300'
             }`}>
               {lock.status}
@@ -87,12 +86,6 @@ export default function LockCard({ lock, index, onDelete }) {
           <div className="flex flex-col items-end pt-1">
             <div className="text-[10px] font-black text-mono-300 uppercase tracking-widest">
               {isActive ? 'LOCKED' : 'CLEARED'}
-            </div>
-            {lock.isBypassFailed && isActive && (
-              <span className="text-[8px] font-black text-red-500 uppercase tracking-[0.2em] mt-1 bg-red-100/50 px-1 border border-red-200">
-                LOCKED_OUT
-              </span>
-            )}
           </div>
         </div>
 
