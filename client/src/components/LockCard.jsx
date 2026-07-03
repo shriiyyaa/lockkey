@@ -86,6 +86,7 @@ export default function LockCard({ lock, index, onDelete }) {
           <div className="flex flex-col items-end pt-1">
             <div className="text-[10px] font-black text-mono-300 uppercase tracking-widest">
               {isActive ? 'LOCKED' : 'CLEARED'}
+            </div>
           </div>
         </div>
 
